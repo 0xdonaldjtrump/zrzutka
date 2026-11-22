@@ -1,0 +1,19 @@
+{
+  "name": "zrzutka",
+  "version": "1.0.0",
+  "private": true,
+  "description": "All-or-nothing crowdfunding in USDC on Base network",
+  "scripts": {
+    "compile": "node scripts/compile.js",
+    "test": "node test/run.js",
+    "build": "node scripts/build.js"
+  },
+  "devDependencies": {
+    "@openzeppelin/contracts": "5.1.0",
+    "ethers": "6.13.4",
+    "ganache": "7.9.2",
+    "solc": "0.8.24"
+  },
+  "keywords": ["base", "usdc", "crowdfunding", "all-or-nothing", "nft", "solidity", "web3"],
+  "license": "MIT"
+}
