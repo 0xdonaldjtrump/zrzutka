@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Zrzutka — all-or-nothing fundraising on Base (USDC)</title>
+<meta name="description" content="Zrzutka: all-or-nothing fundraising in USDC on Base. Goal reached — the creator gets the money. Goal missed — everyone gets a refund. Supporter NFT badges.">
+<meta name="theme-color" content="#0052ff">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230052ff'/%3E%3Cpath d='M18 26h28l-4 24H22z' fill='%23fff'/%3E%3Ccircle cx='32' cy='18' r='7' fill='%2300c2ff'/%3E%3C/svg%3E">
+<style>
+:root{--bg:#f3f6fc;--card:#fff;--ink:#0f1a2e;--muted:#66718a;--line:#e0e6f1;--blue:#0052ff;--blue2:#00c2ff;--ok:#0e9f5a;--bad:#d93848;--warn:#b7791f;--r:16px;--sh:0 8px 28px rgba(15,26,46,.08)}
+*{box-sizing:border-box}
+body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--ink);background:radial-gradient(900px 500px at 0% -10%,#d9e5ff 0,transparent 60%),radial-gradient(700px 400px at 100% 0%,#d6f6ff 0,transparent 55%),var(--bg);min-height:100vh}
+a{color:var(--blue)}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+.top{max-width:1080px;margin:0 auto;padding:14px 18px;display:flex;align-items:center;gap:10px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:900;font-size:20px;cursor:pointer}
+.brand svg{width:36px;height:36px}
+.brand small{display:block;font-size:11.5px;color:var(--muted);font-weight:700}
+.sp{flex:1}
+.chip{white-space:nowrap;background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 12px;font-size:13px;font-weight:700}
+.wrap{max-width:1080px;margin:0 auto;padding:4px 18px 60px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:var(--sh)}
+.btn{background:linear-gradient(180deg,#2b6bff,var(--blue));color:#fff;border:0;border-radius:12px;padding:11px 18px;font-weight:800;font-size:15px;box-shadow:0 6px 18px rgba(0,82,255,.25)}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.ghost{background:#fff;color:var(--blue);border:1px solid #c8d6f5;box-shadow:none}
+.btn.small{padding:7px 12px;font-size:13px;border-radius:10px}
+.btn.big{width:100%;padding:14px;font-size:17px}
+.btn.green{background:linear-gradient(180deg,#14b86a,#0e9f5a)}
+.btn.red{background:#fff;color:var(--bad);border:1px solid #f1c3c8;box-shadow:none}
+h1{font-size:40px;line-height:1.1;margin:8px 0;letter-spacing:-.5px}
+h2{font-size:20px;margin:0 0 12px}
+.muted{color:var(--muted)}
+.hero{display:grid;grid-template-columns:1.2fr .8fr;gap:20px;align-items:center;margin:16px 0 20px}
+.hero p{font-size:17px;line-height:1.55;color:#3b4660}
+.steps{display:grid;gap:8px;margin:14px 0}
+.steps div{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:14.5px}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.kpi{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;text-align:center}
+.kpi b{display:block;font-size:24px}
+.kpi span{font-size:12.5px;color:var(--muted)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 14px}
+.tabs button{background:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-weight:700;font-size:14px}
+.tabs button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.cc{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:var(--sh);cursor:pointer;display:flex;flex-direction:column;gap:8px;transition:transform .12s}
+.cc:hover{transform:translateY(-2px)}
+.cc h3{margin:0;font-size:17px;line-height:1.3}
+.cc .tag{align-self:flex-start}.cc .by{font-size:12.5px;color:var(--muted)}
+.bar{height:10px;background:#e8eef9;border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--blue2));border-radius:99px}
+.bar.ok i{background:linear-gradient(90deg,#0e9f5a,#4fd18b)}
+.meta{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);gap:8px;flex-wrap:wrap}
+.meta b{color:var(--ink)}
+.tag{display:inline-block;font-size:11.5px;font-weight:800;border-radius:7px;padding:3px 8px}
+.t-act{background:#e6eeff;color:var(--blue)} .t-ok{background:#e4f8ee;color:var(--ok)} .t-fail{background:#fde9eb;color:var(--bad)} .t-can{background:#eef0f4;color:#5b6478} .t-goal{background:#fff3d6;color:var(--warn)}
+.empty{text-align:center;color:var(--muted);padding:40px 10px}
+.two{display:grid;grid-template-columns:1.4fr .9fr;gap:18px;align-items:start}
+.desc{white-space:pre-wrap;line-height:1.6;font-size:15.5px;overflow-wrap:anywhere}
+.big{font-size:32px;font-weight:900}
+.amounts{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.amounts button{background:#f3f6fc;border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-weight:800}
+.amounts button.on{border-color:var(--blue);color:var(--blue);background:#eaf0ff}
+.inp,textarea.inp{width:100%;border:1px solid var(--line);border-radius:11px;padding:10px 12px;background:#fff;outline:none}
+.inp:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,82,255,.12)}
+label.l{display:block;font-weight:700;font-size:13.5px;margin:12px 0 6px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.list{display:flex;flex-direction:column;gap:8px}
+.item{border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:14px}
+.item .t{font-size:12px;color:var(--muted)}
+.section{margin-top:16px}
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.badges img{width:100%;border-radius:16px;border:1px solid var(--line)}
+.note{font-size:12.5px;color:var(--muted);line-height:1.5}
+.warnbox{background:#fff7e6;border:1px solid #f3d595;border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.5}
+#toasts{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:60;width:min(92vw,460px)}
+.toast{background:#0f1a2e;color:#fff;border-radius:12px;padding:11px 14px;font-size:14px;box-shadow:var(--sh)}
+.toast.err{background:#9b1c1c}.toast.ok{background:#0e7a43}
+#hint{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:70;background:#fff6dd;border:1px solid #f0c75a;color:#5a4300;border-radius:12px;padding:11px 16px;font-size:14px;font-weight:600;max-width:min(94vw,560px)}
+.modal{position:fixed;inset:0;background:rgba(15,26,46,.45);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.modal .card{max-width:460px;width:100%}
+.wl{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.wl button{display:flex;align-items:center;gap:12px;background:#f7f9fd;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-weight:700;text-align:left}
+.wl img{width:28px;height:28px}
+.spin{width:15px;height:15px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;display:inline-block;animation:sp .8s linear infinite;vertical-align:-3px;margin-right:6px}
+@keyframes sp{to{transform:rotate(360deg)}}
+code{background:#eef2f9;border-radius:6px;padding:2px 6px;font-size:12.5px;word-break:break-all}
+@media(max-width:820px){.hero,.two{grid-template-columns:1fr}.two>div:last-child{order:-1}h1{font-size:30px}.kpis{grid-template-columns:repeat(3,1fr)}.brand small,#usdcChip{display:none!important}.top{gap:6px;padding:12px}}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="brand" id="brand"><svg viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#0052ff"/><path d="M18 26h28l-4 24H22z" fill="#fff"/><circle cx="32" cy="18" r="7" fill="#00c2ff"/></svg><div>Zrzutka<small data-i18n="tagline">all-or-nothing · USDC · Base</small></div></div>
+  <div class="sp"></div>
+  <button class="chip hidden" id="adminChip">Admin</button>
+  <button class="chip" id="langChip">EN</button>
+  <button class="chip hidden" id="usdcChip"></button>
+  <button class="chip" id="acct" data-i18n="connect">Połącz portfel</button>
+</div>
+
+<div class="wrap">
+  <!-- SETUP -->
+  <section id="vSetup" class="hidden">
+    <div class="card" style="max-width:560px;margin:30px auto;text-align:center">
+      <h2 style="font-size:24px" data-i18n="setupTitle">Konfiguracja Zrzutki</h2>
+      <p class="muted" data-i18n="setupText">Ta strona nie ma jeszcze kontraktu. Połącz portfel, na który mają trafiać prowizje (1% od udanych zbiórek), i wdroż kontrakt na Base.</p>
+      <button class="btn" id="btnDeploy" data-i18n="deploy">Połącz portfel i wdroż</button>
+      <p class="warnbox hidden" id="deployStep" style="margin-top:14px"></p>
+      <div id="deployResult" class="hidden"><p><span data-i18n="deployed">Kontrakt wdrożony:</span><br><code id="deployedAddr"></code></p><p class="muted" data-i18n="deployedSend">Wyślij ten adres osobie, która prowadzi stronę — po dodaniu każdy zobaczy zbiórki pod tym linkiem.</p></div>
+    </div>
+  </section>
+
+  <!-- HOME -->
+  <section id="vHome" class="hidden">
+    <div class="hero">
+      <div>
+        <h1 data-i18n="heroTitle">Zrzutka na Base. Wszystko albo nic.</h1>
+        <p data-i18n="heroText">Zbieraj pieniądze w USDC na wyjazd, prezent, remont czy projekt. Jeśli cel zostanie osiągnięty — organizator dostaje pieniądze. Jeśli nie — każdy dostaje automatyczny zwrot.</p>
+        <div class="row"><button class="btn" id="btnNew" data-i18n="newCampaign">+ Załóż zbiórkę</button><a class="btn ghost" href="#how" data-i18n="howBtn">Jak to działa?</a></div>
+      </div>
+      <div class="kpis"><div class="kpi"><b id="kC">–</b><span data-i18n="kCampaigns">zbiórek</span></div><div class="kpi"><b id="kR">–</b><span data-i18n="kRaised">zebrano</span></div><div class="kpi"><b id="kB">–</b><span data-i18n="kBadges">odznak NFT</span></div></div>
+    </div>
+    <div class="tabs" id="tabs">
+      <button data-t="active" class="on" data-i18n="tActive">Trwające</button>
+      <button data-t="success" data-i18n="tSuccess">Udane</button>
+      <button data-t="ended" data-i18n="tEnded">Zakończone</button>
+      <button data-t="mine" data-i18n="tMine">Moje</button>
+      <button data-t="backed" data-i18n="tBacked">Wsparłem</button>
+    </div>
+    <div class="grid" id="list"></div>
+    <div class="card section" id="how">
+      <h2 data-i18n="howTitle">Jak to działa</h2>
+      <div class="steps">
+        <div data-i18n="how1">1️⃣ Organizator zakłada zbiórkę: cel w USDC (od $1) i termin (do 180 dni).</div>
+        <div data-i18n="how2">2️⃣ Wspierający wpłacają USDC jednym podpisem w portfelu i mogą zostawić wiadomość.</div>
+        <div data-i18n="how3">3️⃣ Cel osiągnięty → organizator wypłaca środki (prowizja platformy 1%).</div>
+        <div data-i18n="how4">4️⃣ Cel nieosiągnięty albo zbiórka anulowana → każdy odbiera 100% zwrotu.</div>
+        <div data-i18n="how5">5️⃣ Wspierający udanych zbiórek odbierają odznakę NFT „Supporter” (na zawsze w portfelu).</div>
+      </div>
+      <p class="note" data-i18n="howNote">Kontrakt nie przechodził audytu. Wpłacaj kwoty, których utraty nie odczujesz. Pieniądze trzyma kontrakt, nie żadna firma.</p>
+    </div>
+  </section>
+
+  <!-- CREATE -->
+  <section id="vCreate" class="hidden">
+    <div class="card" style="max-width:640px;margin:10px auto">
+      <h2 data-i18n="createTitle">Nowa zbiórka</h2>
+      <label class="l" data-i18n="fTitle">Tytuł (max 80 znaków)</label><input class="inp" id="fTitle" maxlength="80">
+      <label class="l" data-i18n="fDesc">Opis — na co zbierasz i dlaczego</label><textarea class="inp" id="fDesc" rows="6" maxlength="1000"></textarea>
+      <label class="l" data-i18n="fLink">Link (opcjonalnie — strona, X, zdjęcia)</label><input class="inp" id="fLink" maxlength="200" placeholder="https://">
+      <div class="row" style="align-items:flex-start">
+        <div style="flex:1;min-width:180px"><label class="l" data-i18n="fGoal">Cel (USDC)</label><input class="inp" id="fGoal" type="number" min="1" step="1" value="100"></div>
+        <div style="flex:1;min-width:180px"><label class="l"><span data-i18n="fDays">Czas trwania</span>: <b id="fDaysV">30</b> <span data-i18n="days">dni</span></label><input id="fDays" type="range" min="1" max="180" value="30" style="width:100%"></div>
+      </div>
+      <p class="note" id="fPreview"></p>
+      <div class="acts"><button class="btn" id="btnCreate" data-i18n="createBtn">Załóż zbiórkę</button><button class="btn ghost" id="btnCreateBack" data-i18n="back">Wróć</button></div>
+    </div>
+  </section>
+
+  <!-- CAMPAIGN -->
+  <section id="vCamp" class="hidden">
+    <p><a href="#" id="campBack" data-i18n="backList">← Wszystkie zbiórki</a></p>
+    <div class="two">
+      <div>
+        <div class="card">
+          <div class="row"><span id="cTag"></span><span class="muted" id="cId"></span></div>
+          <h1 id="cTitle" style="font-size:30px"></h1>
+          <div class="muted" id="cBy"></div>
+          <p class="desc" id="cDesc"></p>
+          <p id="cLink"></p>
+          <div class="acts">
+            <button class="btn ghost small" id="bUp">👍 <span id="cUp">0</span></button>
+            <button class="btn ghost small" id="bFollow">🔔 <span id="cFollowTxt"></span> · <span id="cFol">0</span></button>
+            <button class="btn ghost small" id="bShare" data-i18n="share">🔗 Udostępnij</button>
+            <button class="btn ghost small" id="bReport" data-i18n="report">🚩 Zgłoś</button>
+          </div>
+        </div>
+        <div class="card section"><h2 data-i18n="updates">Aktualności</h2><div class="list" id="cUpdates"></div>
+          <div id="creatorUpdate" class="hidden section"><textarea class="inp" id="updText" rows="3" maxlength="500" data-i18n-ph="updPh" placeholder="Napisz aktualność dla wspierających…"></textarea><div class="acts"><button class="btn small" id="bPostUpd" data-i18n="postUpd">Opublikuj aktualność</button></div></div>
+        </div>
+        <div class="card section"><h2><span data-i18n="backersList">Wspierający</span> <span class="muted" id="cBackCount"></span></h2><div class="list" id="cBackings"></div></div>
+      </div>
+      <div>
+        <div class="card">
+          <div class="big" id="cRaised">$0</div>
+          <div class="muted" id="cGoal"></div>
+          <div class="bar" id="cBarWrap" style="margin:10px 0"><i id="cBar"></i></div>
+          <div class="meta"><span><b id="cBackers">0</b> <span data-i18n="backers">wspierających</span></span><span id="cTime"></span></div>
+          <div id="boxGive" class="section">
+            <label class="l" data-i18n="giveAmount">Kwota (USDC)</label>
+            <div class="amounts" id="amts"></div>
+            <input class="inp" id="gAmount" type="number" min="0.01" step="0.01" value="10">
+            <label class="l" data-i18n="giveMsg">Wiadomość (opcjonalnie)</label>
+            <input class="inp" id="gMsg" maxlength="200" data-i18n-ph="giveMsgPh" placeholder="Powodzenia! 💙">
+            <button class="btn big" id="bGive" style="margin-top:12px" data-i18n="give">Wesprzyj</button>
+            <p class="note" id="gNote"></p>
+          </div>
+          <div id="boxMine" class="section"></div>
+        </div>
+        <div class="card section hidden" id="boxCreator">
+          <h2 data-i18n="creatorPanel">Panel organizatora</h2>
+          <div class="acts">
+            <button class="btn green small" id="bClaim" data-i18n="claim">💰 Wypłać środki</button>
+            <button class="btn ghost small" id="bExtend" data-i18n="extend">⏳ Przedłuż termin</button>
+            <button class="btn ghost small" id="bEdit" data-i18n="edit">✏️ Edytuj opis</button>
+            <button class="btn red small" id="bCancel" data-i18n="cancelC">Anuluj zbiórkę</button>
+          </div>
+          <p class="note" data-i18n="creatorNote">Wypłata działa, gdy cel jest osiągnięty — także przed terminem (wtedy zbiórka się kończy). Anulowanie pozwala wszystkim odebrać zwrot.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROFILE -->
+  <section id="vMe" class="hidden">
+    <div class="card" style="max-width:720px;margin:10px auto">
+      <h2 data-i18n="myProfile">Mój profil</h2>
+      <label class="l" data-i18n="pName">Nazwa wyświetlana przy Twoich zbiórkach i wpłatach</label>
+      <div class="row"><input class="inp" id="pName" maxlength="32" style="flex:1"><button class="btn small" id="bName" data-i18n="save">Zapisz</button></div>
+      <h2 class="section" data-i18n="myBadges">Moje odznaki NFT</h2>
+      <div class="badges" id="myBadges"></div>
+      <p class="note" data-i18n="badgesNote">Odznaki dostajesz za wsparcie udanych zbiórek. Są „soulbound” — nie da się ich sprzedać ani przenieść.</p>
+    </div>
+  </section>
+
+  <!-- ADMIN -->
+  <section id="vAdmin" class="hidden">
+    <div class="card" style="max-width:720px;margin:10px auto">
+      <h2 data-i18n="adminTitle">Panel admina</h2>
+      <div class="kpis"><div class="kpi"><b id="aC">–</b><span data-i18n="kCampaigns">zbiórek</span></div><div class="kpi"><b id="aR">–</b><span data-i18n="kRaised">zebrano</span></div><div class="kpi"><b id="aF">–</b><span data-i18n="aFees">prowizje</span></div></div>
+      <label class="l" data-i18n="aFee">Prowizja od udanych zbiórek (%) — max 5</label><div class="row"><input class="inp" id="aFeeIn" type="number" min="0" max="5" step="0.1" style="max-width:160px"><button class="btn small" id="aFeeSave" data-i18n="save">Zapisz</button></div>
+      <label class="l" data-i18n="aLimits">Minimalny cel (USDC) / maks. liczba dni</label><div class="row"><input class="inp" id="aMin" type="number" min="1" style="max-width:140px"><input class="inp" id="aMax" type="number" min="1" max="365" style="max-width:140px"><button class="btn small" id="aLimSave" data-i18n="save">Zapisz</button></div>
+      <label class="l" data-i18n="aStop">Zatrzymaj oszukańczą zbiórkę (wszyscy dostaną zwrot)</label><div class="row"><input class="inp" id="aStopId" type="number" min="1" placeholder="ID" style="max-width:140px"><button class="btn red small" id="aStopBtn" data-i18n="aStopBtn">Zatrzymaj</button></div>
+      <label class="l" data-i18n="aPause">Nowe zbiórki i wpłaty</label><button class="btn small" id="aPauseBtn"></button>
+      <p class="note"><span data-i18n="aContract">Kontrakt</span>: <a id="aLink" target="_blank" rel="noopener"></a> · <span data-i18n="aFeesTo">prowizje trafiają do</span> <code id="aOwner"></code></p>
+    </div>
+  </section>
+</div>
+<div id="toasts"></div>
+<div id="hint" class="hidden"></div>
+
+<script src="ethers.umd.min.js"></script>
+<script>
+/* ================= CONFIG ================= */
+const CONTRACT_ADDRESS = "__CONTRACT_ADDRESS__";
+const USDC_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"; // native USDC on Base
+const CHAIN_ID = 8453;
+const RPCS = ["https://mainnet.base.org","https://base-rpc.publicnode.com","https://base.llamarpc.com"];
+const EXPLORER = "https://basescan.org";
+const SITE_URL = "https://0xdonaldjtrump.github.io/zrzutka/";
+const ABI = [{"inputs":[{"internalType":"address","name":"_usdc","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[],"name":"AlreadyDone","type":"error"},{"inputs":[],"name":"BadInput","type":"error"},{"inputs":[{"internalType":"address","name":"sender","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"address","name":"owner","type":"address"}],"name":"ERC721IncorrectOwner","type":"error"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"ERC721InsufficientApproval","type":"error"},{"inputs":[{"internalType":"address","name":"approver","type":"address"}],"name":"ERC721InvalidApprover","type":"error"},{"inputs":[{"internalType":"address","name":"operator","type":"address"}],"name":"ERC721InvalidOperator","type":"error"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"ERC721InvalidOwner","type":"error"},{"inputs":[{"internalType":"address","name":"receiver","type":"address"}],"name":"ERC721InvalidReceiver","type":"error"},{"inputs":[{"internalType":"address","name":"sender","type":"address"}],"name":"ERC721InvalidSender","type":"error"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"ERC721NonexistentToken","type":"error"},{"inputs":[],"name":"Ended","type":"error"},{"inputs":[],"name":"GoalNotReached","type":"error"},{"inputs":[],"name":"GoalReached","type":"error"},{"inputs":[],"name":"NotActive","type":"error"},{"inputs":[],"name":"NotCreator","type":"error"},{"inputs":[],"name":"NotEligible","type":"error"},{"inputs":[],"name":"NotEnded","type":"error"},{"inputs":[],"name":"NotOwner","type":"error"},{"inputs":[],"name":"NothingToRefund","type":"error"},{"inputs":[],"name":"Paused","type":"error"},{"inputs":[],"name":"ReentrancyGuardReentrantCall","type":"error"},{"inputs":[{"internalType":"address","name":"token","type":"address"}],"name":"SafeERC20FailedOperation","type":"error"},{"inputs":[],"name":"Soulbound","type":"error"},{"inputs":[],"name":"UnknownCampaign","type":"error"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"approved","type":"address"},{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"operator","type":"address"},{"indexed":false,"internalType":"bool","name":"approved","type":"bool"}],"name":"ApprovalForAll","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":true,"internalType":"address","name":"backer","type":"address"},{"indexed":false,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"BadgeMinted","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":true,"internalType":"address","name":"creator","type":"address"},{"indexed":false,"internalType":"uint256","name":"goal","type":"uint256"},{"indexed":false,"internalType":"uint64","name":"deadline","type":"uint64"},{"indexed":false,"internalType":"string","name":"title","type":"string"}],"name":"CampaignCreated","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"id","type":"uint256"}],"name":"CampaignEdited","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":false,"internalType":"bool","name":"byAdmin","type":"bool"}],"name":"Cancelled","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"toCreator","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"fee","type":"uint256"}],"name":"Claimed","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":true,"internalType":"address","name":"backer","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"},{"indexed":false,"internalType":"string","name":"message","type":"string"}],"name":"Contributed","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":false,"internalType":"uint64","name":"deadline","type":"uint64"}],"name":"DeadlineExtended","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":true,"internalType":"address","name":"who","type":"address"},{"indexed":false,"internalType":"bool","name":"following","type":"bool"}],"name":"Followed","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"who","type":"address"},{"indexed":false,"internalType":"string","name":"name","type":"string"}],"name":"ProfileSet","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":true,"internalType":"address","name":"backer","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"Refunded","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":true,"internalType":"address","name":"who","type":"address"},{"indexed":false,"internalType":"string","name":"reason","type":"string"}],"name":"Reported","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"index","type":"uint256"}],"name":"UpdatePosted","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"id","type":"uint256"},{"indexed":true,"internalType":"address","name":"who","type":"address"}],"name":"Upvoted","type":"event"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"}],"name":"adminCancel","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"approve","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"badgeCampaign","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"address","name":"","type":"address"}],"name":"badgeOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"badgesMinted","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"who","type":"address"}],"name":"campaignsBackedBy","outputs":[{"internalType":"uint256[]","name":"","type":"uint256[]"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"campaignsCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"who","type":"address"}],"name":"campaignsCreatedBy","outputs":[{"internalType":"uint256[]","name":"","type":"uint256[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"}],"name":"cancel","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"}],"name":"claim","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"string","name":"message","type":"string"}],"name":"contribute","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"string","name":"message","type":"string"},{"internalType":"uint256","name":"permitDeadline","type":"uint256"},{"internalType":"uint8","name":"v","type":"uint8"},{"internalType":"bytes32","name":"r","type":"bytes32"},{"internalType":"bytes32","name":"s","type":"bytes32"}],"name":"contributeWithPermit","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"address","name":"","type":"address"}],"name":"contributionOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"string","name":"title","type":"string"},{"internalType":"string","name":"description","type":"string"},{"internalType":"string","name":"link","type":"string"},{"internalType":"uint256","name":"goal","type":"uint256"},{"internalType":"uint32","name":"durationDays","type":"uint32"}],"name":"createCampaign","outputs":[{"internalType":"uint256","name":"id","type":"uint256"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"string","name":"description","type":"string"},{"internalType":"string","name":"link","type":"string"}],"name":"editCampaign","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"uint32","name":"extraDays","type":"uint32"}],"name":"extendDeadline","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"feeBps","outputs":[{"internalType":"uint16","name":"","type":"uint16"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"address","name":"","type":"address"}],"name":"following","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"getApproved","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"uint256","name":"offset","type":"uint256"},{"internalType":"uint256","name":"limit","type":"uint256"}],"name":"getBackings","outputs":[{"components":[{"internalType":"address","name":"backer","type":"address"},{"internalType":"uint64","name":"time","type":"uint64"},{"internalType":"uint256","name":"amount","type":"uint256"},{"internalType":"string","name":"message","type":"string"}],"internalType":"struct Zrzutka.Backing[]","name":"list","type":"tuple[]"},{"internalType":"uint256","name":"total","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"}],"name":"getCampaign","outputs":[{"components":[{"internalType":"address","name":"creator","type":"address"},{"internalType":"uint64","name":"createdAt","type":"uint64"},{"internalType":"uint64","name":"deadline","type":"uint64"},{"internalType":"enum Zrzutka.Status","name":"status","type":"uint8"},{"internalType":"bool","name":"extended","type":"bool"},{"internalType":"bool","name":"goalReachedEarly","type":"bool"},{"internalType":"uint256","name":"goal","type":"uint256"},{"internalType":"uint256","name":"raised","type":"uint256"},{"internalType":"uint256","name":"refunded","type":"uint256"},{"internalType":"uint32","name":"backers","type":"uint32"},{"internalType":"uint32","name":"upvotes","type":"uint32"},{"internalType":"uint32","name":"followers","type":"uint32"},{"internalType":"uint32","name":"reports","type":"uint32"},{"internalType":"string","name":"title","type":"string"},{"internalType":"string","name":"description","type":"string"},{"internalType":"string","name":"link","type":"string"}],"internalType":"struct Zrzutka.Campaign","name":"","type":"tuple"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"offset","type":"uint256"},{"internalType":"uint256","name":"limit","type":"uint256"}],"name":"getCampaigns","outputs":[{"internalType":"uint256[]","name":"ids","type":"uint256[]"},{"components":[{"internalType":"address","name":"creator","type":"address"},{"internalType":"uint64","name":"createdAt","type":"uint64"},{"internalType":"uint64","name":"deadline","type":"uint64"},{"internalType":"enum Zrzutka.Status","name":"status","type":"uint8"},{"internalType":"bool","name":"extended","type":"bool"},{"internalType":"bool","name":"goalReachedEarly","type":"bool"},{"internalType":"uint256","name":"goal","type":"uint256"},{"internalType":"uint256","name":"raised","type":"uint256"},{"internalType":"uint256","name":"refunded","type":"uint256"},{"internalType":"uint32","name":"backers","type":"uint32"},{"internalType":"uint32","name":"upvotes","type":"uint32"},{"internalType":"uint32","name":"followers","type":"uint32"},{"internalType":"uint32","name":"reports","type":"uint32"},{"internalType":"string","name":"title","type":"string"},{"internalType":"string","name":"description","type":"string"},{"internalType":"string","name":"link","type":"string"}],"internalType":"struct Zrzutka.Campaign[]","name":"list","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"}],"name":"getUpdates","outputs":[{"components":[{"internalType":"uint64","name":"time","type":"uint64"},{"internalType":"string","name":"text","type":"string"}],"internalType":"struct Zrzutka.Update[]","name":"","type":"tuple[]"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"operator","type":"address"}],"name":"isApprovedForAll","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"maxDurationDays","outputs":[{"internalType":"uint32","name":"","type":"uint32"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"minGoal","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"}],"name":"mintBadge","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"ownerOf","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"paused","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"string","name":"text","type":"string"}],"name":"postUpdate","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"","type":"address"}],"name":"profileName","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"}],"name":"refund","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"address","name":"","type":"address"}],"name":"refundedTo","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"string","name":"reason","type":"string"}],"name":"report","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"address","name":"","type":"address"}],"name":"reported","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"bool","name":"approved","type":"bool"}],"name":"setApprovalForAll","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint16","name":"bps","type":"uint16"}],"name":"setFee","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"},{"internalType":"bool","name":"on","type":"bool"}],"name":"setFollow","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"_minGoal","type":"uint256"},{"internalType":"uint32","name":"_maxDurationDays","type":"uint32"}],"name":"setLimits","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bool","name":"value","type":"bool"}],"name":"setPaused","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"string","name":"name","type":"string"}],"name":"setProfileName","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"stats","outputs":[{"internalType":"uint256","name":"campaigns_","type":"uint256"},{"internalType":"uint256","name":"raised_","type":"uint256"},{"internalType":"uint256","name":"fees_","type":"uint256"},{"internalType":"uint256","name":"badges_","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"bytes4","name":"interfaceId","type":"bytes4"}],"name":"supportsInterface","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"tokenURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalFees","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalRaised","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"transferFrom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"id","type":"uint256"}],"name":"upvote","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"},{"internalType":"address","name":"","type":"address"}],"name":"upvoted","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"usdc","outputs":[{"internalType":"contract IERC20","name":"","type":"address"}],"stateMutability":"view","type":"function"}];
+const BYTECODE = "0x60a060405260078054601960a21b61ffff60a01b19909116179055620f42406008556009805463ffffffff191660b41790553480156200003e57600080fd5b506040516200518e3803806200518e8339810160408190526200006191620000f5565b604051806040016040528060118152602001702d393d3aba35b09029bab83837b93a32b960791b81525060405180604001604052806005815260200164169496955560da1b8152508160009081620000ba9190620001ce565b506001620000c98282620001ce565b50506001600655506001600160a01b0316608052600780546001600160a01b031916331790556200029a565b6000602082840312156200010857600080fd5b81516001600160a01b03811681146200012057600080fd5b9392505050565b634e487b7160e01b600052604160045260246000fd5b600181811c908216806200015257607f821691505b6020821081036200017357634e487b7160e01b600052602260045260246000fd5b50919050565b601f821115620001c9576000816000526020600020601f850160051c81016020861015620001a45750805b601f850160051c820191505b81811015620001c557828155600101620001b0565b5050505b505050565b81516001600160401b03811115620001ea57620001ea62000127565b6200020281620001fb84546200013d565b8462000179565b602080601f8311600181146200023a5760008415620002215750858301515b600019600386901b1c1916600185901b178555620001c5565b600085815260208120601f198616915b828110156200026b578886015182559484019460019091019084016200024a565b50858210156200028a5787850151600019600388901b60f8161c191681555b5050505050600190811b01905550565b608051614eb5620002d96000396000818161057f015281816113fd015281816116230152818161165c015281816120c40152612dbf0152614eb56000f3fe608060405234801561001057600080fd5b50600436106103835760003560e01c80636568a2f2116101de578063a22cb4651161010f578063d48675f3116100ad578063f2fde38b1161007c578063f2fde38b14610891578063f34f6b9a146108a4578063f81055b0146108c4578063fd4f1167146108d757600080fd5b8063d48675f314610836578063d4ae02be1461083f578063d80528ae14610852578063e985e9c51461087e57600080fd5b8063c3c63edc116100e9578063c3c63edc146107f4578063c5240cb814610807578063c5c4744c1461081a578063c87b56dd1461082357600080fd5b8063a22cb465146107ae578063b88d4fde146107c1578063c0ffdba0146107d457600080fd5b806395d89b411161017c57806399ac7a801161015657806399ac7a80146107475780639a4868981461075a5780639d4e70171461076d5780639e486db81461079b57600080fd5b806395d89b411461070b57806396a517541461071357806398b704b61461073457600080fd5b806371b2a75b116101b857806371b2a75b146106bf57806372c39161146106d25780638da5cb5b146106e55780638e005553146106f857600080fd5b80636568a2f21461066e5780636813947f1461068157806370a08231146106ac57600080fd5b80632a628e83116102b857806344c89b65116102565780635598f8cc116102305780635598f8cc146106145780635ab3e105146106345780635c975abb146106475780636352211e1461065b57600080fd5b806344c89b65146105c757806345822b7d146105cf5780634cba577f146105ef57600080fd5b8063379607f511610292578063379607f5146105675780633e413bee1461057a57806340e58ee5146105a157806342842e0e146105b457600080fd5b80632a628e831461051d5780632c8b4283146105305780633205c5fd1461055e57600080fd5b8063095ea7b3116103255780631f09120f116102ff5780631f09120f146104a457806323b872dd146104cf57806324a9d853146104e2578063278ecde11461050a57600080fd5b8063095ea7b31461047557806313114a9d1461048857806316c38b3c1461049157600080fd5b8063061f31b911610361578063061f31b9146103f357806306fdde0314610414578063081812fc14610429578063090515661461045457600080fd5b806301ddf0701461038857806301ffc9a71461039d57806304845643146103c5575b600080fd5b61039b610396366004613a76565b610905565b005b6103b06103ab366004613aa5565b6109f0565b60405190151581526020015b60405180910390f35b6103b06103d3366004613ad9565b601160209081526000928352604080842090915290825290205460ff1681565b610406610401366004613b5a565b610a42565b6040519081526020016103bc565b61041c610c99565b6040516103bc9190613c5c565b61043c610437366004613a76565b610d2b565b6040516001600160a01b0390911681526020016103bc565b610467610462366004613c6f565b610d54565b6040516103bc929190613e4e565b61039b610483366004613ec0565b6111bc565b61040660195481565b61039b61049f366004613efa565b6111cb565b6104066104b2366004613ad9565b601260209081526000928352604080842090915290825290205481565b61039b6104dd366004613f15565b611215565b6007546104f790600160a01b900461ffff1681565b60405161ffff90911681526020016103bc565b61039b610518366004613a76565b6112a5565b61039b61052b366004613a76565b61146b565b6103b061053e366004613ad9565b601060209081526000928352604080842090915290825290205460ff1681565b61040660175481565b61039b610575366004613a76565b611533565b61043c7f000000000000000000000000000000000000000000000000000000000000000081565b61039b6105af366004613a76565b6116cd565b61039b6105c2366004613f15565b611723565b600a54610406565b6104066105dd366004613a76565b60136020526000908152604090205481565b6009546105ff9063ffffffff1681565b60405163ffffffff90911681526020016103bc565b610627610622366004613a76565b611743565b6040516103bc9190613f51565b61039b610642366004613f64565b611a0e565b6009546103b090600160201b900460ff1681565b61043c610669366004613a76565b611b81565b61039b61067c366004613faf565b611b8c565b61040661068f366004613ad9565b600d60209081526000928352604080842090915290825290205481565b6104066106ba366004614028565b611c1a565b61039b6106cd366004614043565b611c62565b61039b6106e0366004614095565b611c80565b60075461043c906001600160a01b031681565b61039b6107063660046140d6565b611d0f565b61041c611d83565b6107266107213660046140fa565b611d92565b6040516103bc929190614126565b61041c610742366004614028565b611fe2565b61039b6107553660046141cb565b61207c565b61039b610768366004614255565b612142565b6103b061077b366004613ad9565b600e60209081526000928352604080842090915290825290205460ff1681565b61039b6107a9366004613f64565b612296565b61039b6107bc366004614278565b6123b2565b61039b6107cf3660046142b8565b6123bd565b6107e76107e2366004613a76565b6123d5565b6040516103bc9190614393565b61039b610802366004613a76565b6124ee565b61039b610815366004614412565b612622565b61040660185481565b61041c610831366004613a76565b612760565b61040660085481565b61039b61084d366004614255565b6128e4565b600a546018546019546017546040805194855260208501939093529183015260608201526080016103bc565b6103b061088c366004614435565b612971565b61039b61089f366004614028565b61299f565b6108b76108b2366004614028565b612a13565b6040516103bc919061445f565b6108b76108d2366004614028565b612a7f565b6103b06108e5366004613ad9565b600f60209081526000928352604080842090915290825290205460ff1681565b600061091082612ae9565b6000838152600f6020908152604080832033845290915290205490915060ff161561094e57604051630bdb902160e41b815260040160405180910390fd5b6000828152600f602090815260408083203384529091529020805460ff1916600190811790915560058201805460049061099790849063ffffffff600160201b90910416614488565b92506101000a81548163ffffffff021916908363ffffffff160217905550336001600160a01b0316827f0e092509bde1dd304f477e3ec921b6e4e5092738f70dcd204952ffc1ffdaafdf60405160405180910390a35050565b60006001600160e01b031982166380ac58cd60e01b1480610a2157506001600160e01b03198216635b5e139f60e01b145b80610a3c57506301ffc9a760e01b6001600160e01b03198316145b92915050565b600954600090600160201b900460ff1615610a70576040516313d0ff5960e31b815260040160405180910390fd5b87801580610a7e5750605081115b80610a8a57506103e887115b80610a95575060c885115b15610ab357604051632bb9acf760e01b815260040160405180910390fd5b600854841080610ac7575063ffffffff8316155b80610add575060095463ffffffff908116908416115b15610afb57604051632bb9acf760e01b815260040160405180910390fd5b600a80546001810182556000919091527fc65a7bb8d6351c1cf70c95a316cc6a92839c986682d98bc35f958f4883f9d2a860099091020180546001600160e01b0319163367ffffffffffffffff60a01b191617600160a01b426001600160401b031602178155610b7463ffffffff8516620151806144ac565b610b7e90426144c3565b60018201805467ffffffffffffffff19166001600160401b03929092169190911790556002810185905560068101610bb78b8d83614558565b5060078101610bc7898b83614558565b5060088101610bd7878983614558565b50600a80549050925060146000336001600160a01b03166001600160a01b03168152602001908152602001600020839080600181540180825580915050600190039060005260206000200160009091909190915055336001600160a01b0316837f4932dad85cf56e361f8b30f49dc1123bc826564af13b646517e02148f16781e8878460010160009054906101000a90046001600160401b03168f8f604051610c839493929190614640565b60405180910390a3505098975050505050505050565b606060008054610ca8906144d6565b80601f0160208091040260200160405190810160405280929190818152602001828054610cd4906144d6565b8015610d215780601f10610cf657610100808354040283529160200191610d21565b820191906000526020600020905b815481529060010190602001808311610d0457829003601f168201915b5050505050905090565b6000610d3682612b49565b506000828152600460205260409020546001600160a01b0316610a3c565b600a546060908190808510610da75760408051600080825260208201818152828401909352909190610d9c565b610d896139dd565b815260200190600190039081610d815790505b5092509250506111b5565b600084610db48784614669565b10610dbf5784610dc9565b610dc98683614669565b9050806001600160401b03811115610de357610de36142a2565b604051908082528060200260200182016040528015610e0c578160200160208202803683370190505b509350806001600160401b03811115610e2757610e276142a2565b604051908082528060200260200182016040528015610e6057816020015b610e4d6139dd565b815260200190600190039081610e455790505b50925060005b818110156111b157600081610e7b8986614669565b610e859190614669565b905080868381518110610e9a57610e9a61467c565b6020908102919091010152600a610eb2600183614669565b81548110610ec257610ec261467c565b60009182526020918290206040805161020081018252600990930290910180546001600160a01b03811684526001600160401b03600160a01b9091048116948401949094526001810154938416918301919091529091606083019060ff600160401b909104166002811115610f3957610f39613ccd565b6002811115610f4a57610f4a613ccd565b8152600182015460ff600160481b8204811615156020840152600160501b90910416151560408201526002820154606082015260038201546080820152600482015460a0820152600582015463ffffffff80821660c0840152600160201b8204811660e0840152600160401b82048116610100840152600160601b9091041661012082015260068201805461014090920191610fe5906144d6565b80601f0160208091040260200160405190810160405280929190818152602001828054611011906144d6565b801561105e5780601f106110335761010080835404028352916020019161105e565b820191906000526020600020905b81548152906001019060200180831161104157829003601f168201915b50505050508152602001600782018054611077906144d6565b80601f01602080910402602001604051908101604052809291908181526020018280546110a3906144d6565b80156110f05780601f106110c5576101008083540402835291602001916110f0565b820191906000526020600020905b8154815290600101906020018083116110d357829003601f168201915b50505050508152602001600882018054611109906144d6565b80601f0160208091040260200160405190810160405280929190818152602001828054611135906144d6565b80156111825780601f1061115757610100808354040283529160200191611182565b820191906000526020600020905b81548152906001019060200180831161116557829003601f168201915b50505050508152505085838151811061119d5761119d61467c565b602090810291909101015250600101610e66565b5050505b9250929050565b6111c7828233612b82565b5050565b6007546001600160a01b031633146111f6576040516330cd747160e01b815260040160405180910390fd5b60098054911515600160201b0264ff0000000019909216919091179055565b6001600160a01b03821661124457604051633250574960e11b8152600060048201526024015b60405180910390fd5b6000611251838333612b8f565b9050836001600160a01b0316816001600160a01b03161461129f576040516364283d7b60e01b81526001600160a01b038086166004830152602482018490528216604482015260640161123b565b50505050565b6112ad612bdc565b60006112b882612ae9565b90506000806001830154600160401b900460ff1660028111156112dd576112dd613ccd565b1480156112f7575060018201546001600160401b03164210155b801561130a575081600201548260030154105b90508080611337575060026001830154600160401b900460ff16600281111561133557611335613ccd565b145b61135457604051637c75aa6f60e11b815260040160405180910390fd5b6000838152600d6020908152604080832033845290915290205480158061139457506000848152600e6020908152604080832033845290915290205460ff165b156113b25760405163f76aef6560e01b815260040160405180910390fd5b6000848152600e602090815260408083203384529091528120805460ff191660011790556004840180548392906113ea9084906144c3565b9091555061142490506001600160a01b037f0000000000000000000000000000000000000000000000000000000000000000163383612c06565b604051818152339085907f7ca5472b7ea78c2c0141c5a12ee6d170cf4ce8ed06be3d22c8252ddfc7a6a2c49060200160405180910390a35050506114686001600655565b50565b6007546001600160a01b03163314611496576040516330cd747160e01b815260040160405180910390fd5b60006114a182612ae9565b905060006001820154600160401b900460ff1660028111156114c5576114c5613ccd565b146114e357604051634065aaf160e11b815260040160405180910390fd5b6001818101805460ff60401b1916600160411b17905560405190815282907fdf11c22eefc5804dfbf9c567c2522c17e93416278a0f8a6f8e8f327ee6cb032e906020015b60405180910390a25050565b61153b612bdc565b600061154682612c65565b9050806002015481600301541015611571576040516378c754c960e01b815260040160405180910390fd5b60018101546001600160401b031642101561159c5760018101805460ff60501b1916600160501b1790555b60018101805460ff60401b1916600160401b1790556007546003820154600091612710916115d591600160a01b900461ffff16906144ac565b6115df9190614692565b905060008183600301546115f39190614669565b9050816019600082825461160791906144c3565b9091555050811561164c5760075461164c906001600160a01b037f00000000000000000000000000000000000000000000000000000000000000008116911684612c06565b8254611685906001600160a01b037f00000000000000000000000000000000000000000000000000000000000000008116911683612c06565b604080518281526020810184905285917fd16b1baf5a6367aef04997ff7695583fd3c7b775ba5d24a74c7ae3f33582f32c910160405180910390a25050506114686001600655565b60006116d882612c65565b60018101805460ff60401b1916600160411b1790556040516000815290915082907fdf11c22eefc5804dfbf9c567c2522c17e93416278a0f8a6f8e8f327ee6cb032e90602001611527565b61173e838383604051806020016040528060008152506123bd565b505050565b61174b6139dd565b61175482612ae9565b604080516102008101825282546001600160a01b0381168252600160a01b90046001600160401b03908116602083015260018401549081169282019290925291906060830190600160401b900460ff1660028111156117b5576117b5613ccd565b60028111156117c6576117c6613ccd565b8152600182015460ff600160481b8204811615156020840152600160501b90910416151560408201526002820154606082015260038201546080820152600482015460a0820152600582015463ffffffff80821660c0840152600160201b8204811660e0840152600160401b82048116610100840152600160601b9091041661012082015260068201805461014090920191611861906144d6565b80601f016020809104026020016040519081016040528092919081815260200182805461188d906144d6565b80156118da5780601f106118af576101008083540402835291602001916118da565b820191906000526020600020905b8154815290600101906020018083116118bd57829003601f168201915b505050505081526020016007820180546118f3906144d6565b80601f016020809104026020016040519081016040528092919081815260200182805461191f906144d6565b801561196c5780601f106119415761010080835404028352916020019161196c565b820191906000526020600020905b81548152906001019060200180831161194f57829003601f168201915b50505050508152602001600882018054611985906144d6565b80601f01602080910402602001604051908101604052809291908181526020018280546119b1906144d6565b80156119fe5780601f106119d3576101008083540402835291602001916119fe565b820191906000526020600020905b8154815290600101906020018083116119e157829003601f168201915b5050505050815250509050919050565b6000611a1984612ae9565b80549091506001600160a01b03163314611a46576040516393687c0b60e01b815260040160405180910390fd5b81801580611a5557506101f481115b15611a7357604051632bb9acf760e01b815260040160405180910390fd5b600c60008681526020019081526020016000206040518060400160405280426001600160401b0316815260200186868080601f01602080910402602001604051908101604052809392919081815260200183838082843760009201829052509390945250508354600180820186559482526020918290208451600290920201805467ffffffffffffffff19166001600160401b0390921691909117815590830151929390929083019150611b2790826146b4565b5050506000858152600c602052604090205485907f84b99180bf37c47179fd137c54e261f04fd16d74f078aabb1760edfd8e67578090611b6990600190614669565b60405190815260200160405180910390a25050505050565b6000610a3c82612b49565b6000611b9786612c65565b90506103e8841180611ba9575060c882115b15611bc757604051632bb9acf760e01b815260040160405180910390fd5b60078101611bd6858783614558565b5060088101611be6838583614558565b5060405186907f614c76b810cd8cbdb81d8eb0dd2cc16108a6fbdb71cdbee83f087626d02ccf6090600090a2505050505050565b60006001600160a01b038216611c46576040516322718ad960e21b81526000600482015260240161123b565b506001600160a01b031660009081526003602052604090205490565b611c6a612bdc565b611c7684848484612ce2565b61129f6001600655565b80801580611c8e5750602081115b15611cac57604051632bb9acf760e01b815260040160405180910390fd5b336000908152601660205260409020611cc6838583614558565b50336001600160a01b03167f56d78f91013a9df87c3059830b445edb071285effe6a7fe07fe1b235b9ae0fc38484604051611d02929190614773565b60405180910390a2505050565b6007546001600160a01b03163314611d3a576040516330cd747160e01b815260040160405180910390fd5b6101f48161ffff161115611d6157604051632bb9acf760e01b815260040160405180910390fd5b6007805461ffff909216600160a01b0261ffff60a01b19909216919091179055565b606060018054610ca8906144d6565b6000838152600b602052604090208054606091818510611dfe576040805160008082526020820190925290611df5565b6040805160808101825260008082526020808301829052928201526060808201528252600019909201910181611dc25790505b50925050611fda565b600084611e0b8785614669565b10611e165784611e20565b611e208684614669565b9050806001600160401b03811115611e3a57611e3a6142a2565b604051908082528060200260200182016040528015611e8b57816020015b6040805160808101825260008082526020808301829052928201526060808201528252600019909201910181611e585790505b50935060005b81811015611fd657828188611ea7600188614669565b611eb19190614669565b611ebb9190614669565b81548110611ecb57611ecb61467c565b600091825260209182902060408051608081018252600390930290910180546001600160a01b03811684526001600160401b03600160a01b9091041693830193909352600183015490820152600282018054919291606084019190611f2f906144d6565b80601f0160208091040260200160405190810160405280929190818152602001828054611f5b906144d6565b8015611fa85780601f10611f7d57610100808354040283529160200191611fa8565b820191906000526020600020905b815481529060010190602001808311611f8b57829003601f168201915b505050505081525050858281518110611fc357611fc361467c565b6020908102919091010152600101611e91565b5050505b935093915050565b60166020526000908152604090208054611ffb906144d6565b80601f0160208091040260200160405190810160405280929190818152602001828054612027906144d6565b80156120745780601f1061204957610100808354040283529160200191612074565b820191906000526020600020905b81548152906001019060200180831161205757829003601f168201915b505050505081565b612084612bdc565b60405163d505accf60e01b8152336004820152306024820152604481018890526064810185905260ff8416608482015260a4810183905260c481018290527f00000000000000000000000000000000000000000000000000000000000000006001600160a01b03169063d505accf9060e401600060405180830381600087803b15801561211057600080fd5b505af1925050508015612121575060015b5061212e88888888612ce2565b6121386001600655565b5050505050505050565b600061214d83612c65565b6001810154909150600160481b900460ff168061216e575063ffffffff8216155b8061217f5750601e8263ffffffff16115b1561219d57604051632bb9acf760e01b815260040160405180910390fd5b60018101546001600160401b031642106121ca5760405163477383f360e01b815260040160405180910390fd5b80600201548160030154106121f25760405163f30bb8af60e01b815260040160405180910390fd5b60018101805469ff0000000000000000001916600160481b17905561222063ffffffff8316620151806144ac565b60018201805460009061223d9084906001600160401b0316614787565b82546101009290920a6001600160401b038181021990931691831602179091556001830154604051911681528491507fac52b81ad20c0afcb304187ea46a37a9201799c643db214f853cc6eb69c3ae4590602001611d02565b60006122a184612ae9565b600085815260116020908152604080832033845290915290205490915060ff16156122df57604051630bdb902160e41b815260040160405180910390fd5b60c882111561230157604051632bb9acf760e01b815260040160405180910390fd5b60008481526011602090815260408083203384529091529020805460ff19166001908117909155600582018054600c9061234a90849063ffffffff600160601b90910416614488565b92506101000a81548163ffffffff021916908363ffffffff160217905550336001600160a01b0316847f80feaa1c206357bf334eda2d70fd3a20b46f2978dbd435f0cc09e67302339d3a85856040516123a4929190614773565b60405180910390a350505050565b6111c733838361300a565b6123c8848484611215565b61129f33858585856130a1565b6060600c6000838152602001908152602001600020805480602002602001604051908101604052809291908181526020016000905b828210156124e3576000848152602090819020604080518082019091526002850290910180546001600160401b031682526001810180549293919291840191612452906144d6565b80601f016020809104026020016040519081016040528092919081815260200182805461247e906144d6565b80156124cb5780601f106124a0576101008083540402835291602001916124cb565b820191906000526020600020905b8154815290600101906020018083116124ae57829003601f168201915b5050505050815250508152602001906001019061240a565b505050509050919050565b60006124f982612ae9565b9050600180820154600160401b900460ff16600281111561251c5761251c613ccd565b14158061254057506000828152600d60209081526040808320338452909152902054155b1561255e57604051637c75aa6f60e11b815260040160405180910390fd5b60008281526012602090815260408083203384529091529020541561259657604051630bdb902160e41b815260040160405180910390fd5b60006017600081546125a7906147a7565b918290555060008481526012602090815260408083203380855290835281842085905584845260139092529091208590559091506125e590826131cc565b604051818152339084907f78eaa789845a0b0083ae6b3810c83d1f985898f3ce8c91d6c1aedf1c34cf0b0e906020015b60405180910390a3505050565b600061262d83612ae9565b600084815260106020908152604080832033845290915290205490915082151560ff90911615150361267257604051630bdb902160e41b815260040160405180910390fd5b60008381526010602090815260408083203384529091529020805460ff191683158015919091179091556126e75760018160050160088282829054906101000a900463ffffffff166126c49190614488565b92506101000a81548163ffffffff021916908363ffffffff16021790555061272a565b60018160050160088282829054906101000a900463ffffffff1661270b91906147c0565b92506101000a81548163ffffffff021916908363ffffffff1602179055505b6040518215158152339084907fc15005900d78196444761b34836b6fc9f0406f3e7496235a20c456226fb660ce90602001612615565b606061276b82612b49565b5060008281526013602052604081205490600a612789600184614669565b815481106127995761279961467c565b9060005260206000209060090201905060006127b483613231565b9050600061284d8360060180546127ca906144d6565b80601f01602080910402602001604051908101604052809291908181526020018280546127f6906144d6565b80156128435780601f1061281857610100808354040283529160200191612843565b820191906000526020600020905b81548152906001019060200180831161282657829003601f168201915b50505050506132c4565b9050600081836040516020016128649291906147f9565b6040516020818303038152906040529050600061288088613231565b838561288b856133ed565b60405160200161289e9493929190614c28565b60405160208183030381529060405290506128b8816133ed565b6040516020016128c89190614d87565b6040516020818303038152906040529650505050505050919050565b6007546001600160a01b0316331461290f576040516330cd747160e01b815260040160405180910390fd5b811580612920575063ffffffff8116155b80612932575061016d8163ffffffff16115b1561295057604051632bb9acf760e01b815260040160405180910390fd5b6008919091556009805463ffffffff191663ffffffff909216919091179055565b6001600160a01b03918216600090815260056020908152604080832093909416825291909152205460ff1690565b6007546001600160a01b031633146129ca576040516330cd747160e01b815260040160405180910390fd5b6001600160a01b0381166129f157604051632bb9acf760e01b815260040160405180910390fd5b600780546001600160a01b0319166001600160a01b0392909216919091179055565b6001600160a01b038116600090815260146020908152604091829020805483518184028101840190945280845260609392830182828015612a7357602002820191906000526020600020905b815481526020019060010190808311612a5f575b50505050509050919050565b6001600160a01b038116600090815260156020908152604091829020805483518184028101840190945280845260609392830182828015612a735760200282019190600052602060002090815481526020019060010190808311612a5f5750505050509050919050565b6000811580612af95750600a5482115b15612b17576040516316ac9c3160e11b815260040160405180910390fd5b600a612b24600184614669565b81548110612b3457612b3461467c565b90600052602060002090600902019050919050565b6000818152600260205260408120546001600160a01b031680610a3c57604051637e27328960e01b81526004810184905260240161123b565b61173e8383836001613413565b6000828152600260205260408120546001600160a01b03168015612bc65760405163a4420a9560e01b815260040160405180910390fd5b612bd1858585613519565b9150505b9392505050565b600260065403612bff57604051633ee5aeb560e01b815260040160405180910390fd5b6002600655565b6040516001600160a01b0383811660248301526044820183905261173e91859182169063a9059cbb906064015b604051602081830303815290604052915060e01b6020820180516001600160e01b038381831617835250505050613612565b6000612c7082612ae9565b80549091506001600160a01b03163314612c9d576040516393687c0b60e01b815260040160405180910390fd5b60006001820154600160401b900460ff166002811115612cbf57612cbf613ccd565b14612cdd57604051634065aaf160e11b815260040160405180910390fd5b919050565b600954600160201b900460ff1615612d0d576040516313d0ff5960e31b815260040160405180910390fd5b6000612d1885612ae9565b905060006001820154600160401b900460ff166002811115612d3c57612d3c613ccd565b14612d5a57604051634065aaf160e11b815260040160405180910390fd5b60018101546001600160401b03164210612d875760405163477383f360e01b815260040160405180910390fd5b831580612d94575060c882115b15612db257604051632bb9acf760e01b815260040160405180910390fd5b612de76001600160a01b037f000000000000000000000000000000000000000000000000000000000000000016333087613683565b6000858152600d602090815260408083203384529091528120549003612e685760058101805460019190600090612e2590849063ffffffff16614488565b825463ffffffff9182166101009390930a928302919092021990911617905550336000908152601560209081526040822080546001810182559083529120018590555b6000858152600d6020908152604080832033845290915281208054869290612e919084906144c3565b9250508190555083816003016000828254612eac91906144c3565b925050819055508360186000828254612ec591906144c3565b92505081905550600b60008681526020019081526020016000206040518060800160405280336001600160a01b03168152602001426001600160401b0316815260200186815260200185858080601f016020809104026020016040519081016040528093929190818152602001838380828437600092018290525093909452505083546001818101865594825260209182902084516003909202018054928501516001600160401b0316600160a01b026001600160e01b03199093166001600160a01b03909216919091179190911781556040830151938101939093555060608101519091906002820190612fba90826146b4565b505050336001600160a01b0316857fa448cec32a08884475acef4b5ddfdea998210ab096777a6f4f61eb0fe521b8ec868686604051612ffb93929190614dcc565b60405180910390a35050505050565b6001600160a01b03821661303c57604051630b61174360e31b81526001600160a01b038316600482015260240161123b565b6001600160a01b03838116600081815260056020908152604080832094871680845294825291829020805460ff191686151590811790915591519182527f17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c319101612615565b6001600160a01b0383163b156131c557604051630a85bd0160e11b81526001600160a01b0384169063150b7a02906130e3908890889087908790600401614def565b6020604051808303816000875af192505050801561311e575060408051601f3d908101601f1916820190925261311b91810190614e22565b60015b613187573d80801561314c576040519150601f19603f3d011682016040523d82523d6000602084013e613151565b606091505b50805160000361317f57604051633250574960e11b81526001600160a01b038516600482015260240161123b565b805181602001fd5b6001600160e01b03198116630a85bd0160e11b146131c357604051633250574960e11b81526001600160a01b038516600482015260240161123b565b505b5050505050565b6001600160a01b0382166131f657604051633250574960e11b81526000600482015260240161123b565b600061320483836000612b8f565b90506001600160a01b0381161561173e576040516339e3563760e11b81526000600482015260240161123b565b6060600061323e836136bc565b60010190506000816001600160401b0381111561325d5761325d6142a2565b6040519080825280601f01601f191660200182016040528015613287576020820181803683370190505b5090508181016020015b600019016f181899199a1a9b1b9c1cb0b131b232b360811b600a86061a8153600a8504945084613291575b509392505050565b60606000829050600081516001600160401b038111156132e6576132e66142a2565b6040519080825280601f01601f191660200182016040528015613310576020820181803683370190505b50905060005b82518110156132bc5760008382815181106133335761333361467c565b01602001516001600160f81b0319169050601160f91b8114806133635750600f60fa1b6001600160f81b03198216145b8061337b5750601f60f91b6001600160f81b03198216145b806133935750601360f91b6001600160f81b03198216145b806133ab5750601760fa1b6001600160f81b03198216145b6133b557806133bb565b602760f81b5b8383815181106133cd576133cd61467c565b60200101906001600160f81b031916908160001a90535050600101613316565b6060610a3c82604051806060016040528060408152602001614e40604091396001613794565b808061342757506001600160a01b03821615155b156134e957600061343784612b49565b90506001600160a01b038316158015906134635750826001600160a01b0316816001600160a01b031614155b801561347657506134748184612971565b155b1561349f5760405163a9fbf51f60e01b81526001600160a01b038416600482015260240161123b565b81156134e75783856001600160a01b0316826001600160a01b03167f8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b92560405160405180910390a45b505b5050600090815260046020526040902080546001600160a01b0319166001600160a01b0392909216919091179055565b6000828152600260205260408120546001600160a01b039081169083161561354657613546818486613913565b6001600160a01b0381161561358457613563600085600080613413565b6001600160a01b038116600090815260036020526040902080546000190190555b6001600160a01b038516156135b3576001600160a01b0385166000908152600360205260409020805460010190555b60008481526002602052604080822080546001600160a01b0319166001600160a01b0389811691821790925591518793918516917fddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef91a4949350505050565b600080602060008451602086016000885af180613635576040513d6000823e3d81fd5b50506000513d9150811561364d57806001141561365a565b6001600160a01b0384163b155b1561129f57604051635274afe760e01b81526001600160a01b038516600482015260240161123b565b6040516001600160a01b03848116602483015283811660448301526064820183905261129f9186918216906323b872dd90608401612c33565b60008072184f03e93ff9f4daa797ed6e38ed64bf6a1f0160401b83106136fb5772184f03e93ff9f4daa797ed6e38ed64bf6a1f0160401b830492506040015b6d04ee2d6d415b85acef81000000008310613727576d04ee2d6d415b85acef8100000000830492506020015b662386f26fc10000831061374557662386f26fc10000830492506010015b6305f5e100831061375d576305f5e100830492506008015b612710831061377157612710830492506004015b60648310613783576064830492506002015b600a8310610a3c5760010192915050565b606083516000036137b45750604080516020810190915260008152612bd5565b6000826137e5576003855160046137cb91906144ac565b6137d69060026144c3565b6137e09190614692565b61380a565b6003855160026137f591906144c3565b6137ff9190614692565b61380a9060046144ac565b90506000816001600160401b03811115613826576138266142a2565b6040519080825280601f01601f191660200182016040528015613850576020820181803683370190505b50905060018501602082018788518901602081018051600082525b828410156138c6576003840193508351603f8160121c168701518653600186019550603f81600c1c168701518653600186019550603f8160061c168701518653600186019550603f811687015186535060018501945061386b565b905250508515613907576003885106600181146138ea57600281146138fd57613905565b603d6001830353603d6002830353613905565b603d60018303535b505b50909695505050505050565b61391e838383613977565b61173e576001600160a01b03831661394c57604051637e27328960e01b81526004810182905260240161123b565b60405163177e802f60e01b81526001600160a01b03831660048201526024810182905260440161123b565b60006001600160a01b038316158015906139d55750826001600160a01b0316846001600160a01b031614806139b157506139b18484612971565b806139d557506000828152600460205260409020546001600160a01b038481169116145b949350505050565b60408051610200810182526000808252602082018190529181018290529060608201908152602001600015158152602001600015158152602001600081526020016000815260200160008152602001600063ffffffff168152602001600063ffffffff168152602001600063ffffffff168152602001600063ffffffff1681526020016060815260200160608152602001606081525090565b600060208284031215613a8857600080fd5b5035919050565b6001600160e01b03198116811461146857600080fd5b600060208284031215613ab757600080fd5b8135612bd581613a8f565b80356001600160a01b0381168114612cdd57600080fd5b60008060408385031215613aec57600080fd5b82359150613afc60208401613ac2565b90509250929050565b60008083601f840112613b1757600080fd5b5081356001600160401b03811115613b2e57600080fd5b6020830191508360208285010111156111b557600080fd5b803563ffffffff81168114612cdd57600080fd5b60008060008060008060008060a0898b031215613b7657600080fd5b88356001600160401b0380821115613b8d57600080fd5b613b998c838d01613b05565b909a50985060208b0135915080821115613bb257600080fd5b613bbe8c838d01613b05565b909850965060408b0135915080821115613bd757600080fd5b50613be48b828c01613b05565b90955093505060608901359150613bfd60808a01613b46565b90509295985092959890939650565b60005b83811015613c27578181015183820152602001613c0f565b50506000910152565b60008151808452613c48816020860160208601613c0c565b601f01601f19169290920160200192915050565b602081526000612bd56020830184613c30565b60008060408385031215613c8257600080fd5b50508035926020909101359150565b60008151808452602080850194506020840160005b83811015613cc257815187529582019590820190600101613ca6565b509495945050505050565b634e487b7160e01b600052602160045260246000fd5b60038110613d0157634e487b7160e01b600052602160045260246000fd5b9052565b80516001600160a01b0316825260006102006020830151613d3160208601826001600160401b03169052565b506040830151613d4c60408601826001600160401b03169052565b506060830151613d5f6060860182613ce3565b506080830151613d73608086018215159052565b5060a0830151613d8760a086018215159052565b5060c083015160c085015260e083015160e085015261010080840151818601525061012080840151613dc08287018263ffffffff169052565b50506101408381015163ffffffff908116918601919091526101608085015182169086015261018080850151909116908501526101a080840151818601839052613e0c83870182613c30565b925050506101c08084015185830382870152613e288382613c30565b925050506101e08084015185830382870152613e448382613c30565b9695505050505050565b604081526000613e616040830185613c91565b6020838203818501528185518084528284019150828160051b85010183880160005b83811015613eb157601f19878403018552613e9f838351613d05565b94860194925090850190600101613e83565b50909998505050505050505050565b60008060408385031215613ed357600080fd5b613edc83613ac2565b946020939093013593505050565b80358015158114612cdd57600080fd5b600060208284031215613f0c57600080fd5b612bd582613eea565b600080600060608486031215613f2a57600080fd5b613f3384613ac2565b9250613f4160208501613ac2565b9150604084013590509250925092565b602081526000612bd56020830184613d05565b600080600060408486031215613f7957600080fd5b8335925060208401356001600160401b03811115613f9657600080fd5b613fa286828701613b05565b9497909650939450505050565b600080600080600060608688031215613fc757600080fd5b8535945060208601356001600160401b0380821115613fe557600080fd5b613ff189838a01613b05565b9096509450604088013591508082111561400a57600080fd5b5061401788828901613b05565b969995985093965092949392505050565b60006020828403121561403a57600080fd5b612bd582613ac2565b6000806000806060858703121561405957600080fd5b843593506020850135925060408501356001600160401b0381111561407d57600080fd5b61408987828801613b05565b95989497509550505050565b600080602083850312156140a857600080fd5b82356001600160401b038111156140be57600080fd5b6140ca85828601613b05565b90969095509350505050565b6000602082840312156140e857600080fd5b813561ffff81168114612bd557600080fd5b60008060006060848603121561410f57600080fd5b505081359360208301359350604090920135919050565b60006040808301604084528086518083526060925060608601915060608160051b8701016020808a0160005b848110156141b657898403605f19018652815180516001600160a01b03168552838101516001600160401b031684860152888101518986015287015160808886018190526141a281870183613c30565b978501979550505090820190600101614152565b50509690960196909652509295945050505050565b60008060008060008060008060e0898b0312156141e757600080fd5b883597506020890135965060408901356001600160401b0381111561420b57600080fd5b6142178b828c01613b05565b90975095505060608901359350608089013560ff8116811461423857600080fd5b979a969950949793969295929450505060a08201359160c0013590565b6000806040838503121561426857600080fd5b82359150613afc60208401613b46565b6000806040838503121561428b57600080fd5b61429483613ac2565b9150613afc60208401613eea565b634e487b7160e01b600052604160045260246000fd5b600080600080608085870312156142ce57600080fd5b6142d785613ac2565b93506142e560208601613ac2565b92506040850135915060608501356001600160401b038082111561430857600080fd5b818701915087601f83011261431c57600080fd5b81358181111561432e5761432e6142a2565b604051601f8201601f19908116603f01168101908382118183101715614356576143566142a2565b816040528281528a602084870101111561436f57600080fd5b82602086016020830137600060208483010152809550505050505092959194509250565b600060208083018184528085518083526040925060408601915060408160051b87010184880160005b8381101561440457888303603f19018552815180516001600160401b031684528701518784018790526143f187850182613c30565b95880195935050908601906001016143bc565b509098975050505050505050565b6000806040838503121561442557600080fd5b82359150613afc60208401613eea565b6000806040838503121561444857600080fd5b61445183613ac2565b9150613afc60208401613ac2565b602081526000612bd56020830184613c91565b634e487b7160e01b600052601160045260246000fd5b63ffffffff8181168382160190808211156144a5576144a5614472565b5092915050565b8082028115828204841417610a3c57610a3c614472565b80820180821115610a3c57610a3c614472565b600181811c908216806144ea57607f821691505b60208210810361450a57634e487b7160e01b600052602260045260246000fd5b50919050565b601f82111561173e576000816000526020600020601f850160051c810160208610156145395750805b601f850160051c820191505b818110156131c357828155600101614545565b6001600160401b0383111561456f5761456f6142a2565b6145838361457d83546144d6565b83614510565b6000601f8411600181146145b7576000851561459f5750838201355b600019600387901b1c1916600186901b1783556131c5565b600083815260209020601f19861690835b828110156145e857868501358255602094850194600190920191016145c8565b50868210156146055760001960f88860031b161c19848701351681555b505060018560011b0183555050505050565b81835281816020850137506000828201602090810191909152601f909101601f19169091010190565b8481526001600160401b0384166020820152606060408201526000613e44606083018486614617565b81810381811115610a3c57610a3c614472565b634e487b7160e01b600052603260045260246000fd5b6000826146af57634e487b7160e01b600052601260045260246000fd5b500490565b81516001600160401b038111156146cd576146cd6142a2565b6146e1816146db84546144d6565b84614510565b602080601f83116001811461471657600084156146fe5750858301515b600019600386901b1c1916600185901b1785556131c3565b600085815260208120601f198616915b8281101561474557888601518255948401946001909101908401614726565b50858210156147635787850151600019600388901b60f8161c191681555b5050505050600190811b01905550565b6020815260006139d5602083018486614617565b6001600160401b038181168382160190808211156144a5576144a5614472565b6000600182016147b9576147b9614472565b5060010190565b63ffffffff8281168282160390808211156144a5576144a5614472565b600081516147ef818560208601613c0c565b9290920192915050565b7f3c73766720786d6c6e733d22687474703a2f2f7777772e77332e6f72672f323081527f30302f737667222076696577426f783d223020302034303020343030223e3c6460208201527f6566733e3c6c696e6561724772616469656e742069643d2267222078313d223060408201527f222079313d2230222078323d2231222079323d2231223e3c73746f70206f666660608201527f7365743d2230222073746f702d636f6c6f723d2223303035326666222f3e3c7360808201527f746f70206f66667365743d2231222073746f702d636f6c6f723d22233030633260a08201527f6666222f3e3c2f6c696e6561724772616469656e743e3c2f646566733e00000060c08201527f3c726563742077696474683d2234303022206865696768743d2234303022207260dd8201527f783d223430222066696c6c3d2275726c28236729222f3e3c636972636c65206360fd8201527f783d22323030222063793d223135302220723d223730222066696c6c3d226e6f61011d8201527f6e6522207374726f6b653d222366666622207374726f6b652d77696474683d2261013d82015264189911179f60d91b61015d8201527f3c7061746820643d224d313730203135306c32322032322034322d34362220666101628201527f696c6c3d226e6f6e6522207374726f6b653d222366666622207374726f6b652d6101828201527f77696474683d22313422207374726f6b652d6c696e656361703d22726f756e646101a28201527f22207374726f6b652d6c696e656a6f696e3d22726f756e64222f3e00000000006101c28201527f3c7465787420783d223230302220793d223237302220666f6e742d66616d696c6101dd8201527f793d22417269616c2220666f6e742d73697a653d2232382220666f6e742d77656101fd8201527f696768743d22373030222066696c6c3d22236666662220746578742d616e636861021d8201527f6f723d226d6964646c65223e535550504f525445523c2f746578743e0000000061023d8201527f3c7465787420783d223230302220793d223331302220666f6e742d66616d696c6102598201527f793d22417269616c2220666f6e742d73697a653d223136222066696c6c3d22236102798201527f6666662220746578742d616e63686f723d226d6964646c65223e0000000000006102998201526000614b676102b383015b856147dd565b661e17ba32bc3a1f60c91b81527f3c7465787420783d223230302220793d223335302220666f6e742d66616d696c60078201527f793d22417269616c2220666f6e742d73697a653d223134222066696c6c3d222360278201527f6462653766662220746578742d616e63686f723d226d6964646c65223e5a727a60478201526575746b61202360d01b6067820152614c01606d8201614b61565b741037b7102130b9b29e17ba32bc3a1f1e17b9bb339f60591b815260150195945050505050565b7f7b226e616d65223a225a727a75746b6120537570706f72746572202300000000815260008551614c6081601c850160208a01613c0c565b7f222c226465736372697074696f6e223a224261636b6564206120737563636573601c918401918201527f7366756c20616c6c2d6f722d6e6f7468696e672063616d706169676e206f6e20603c8201526502130b9b29d160d51b605c8201528551614cd2816062840160208a01613c0c565b7f222c2261747472696275746573223a5b7b2274726169745f74797065223a2243606292909101918201527030b6b830b4b3b71116113b30b63ab2911d60791b60828201528451614d2a816093840160208901613c0c565b7f7d5d2c22696d616765223a22646174613a696d6167652f7376672b786d6c3b626093929091019182015265185cd94d8d0b60d21b60b3820152614d7160b98201856147dd565b61227d60f01b8152600201979650505050505050565b7f646174613a6170706c69636174696f6e2f6a736f6e3b6261736536342c000000815260008251614dbf81601d850160208701613c0c565b91909101601d0192915050565b838152604060208201526000614de6604083018486614617565b95945050505050565b6001600160a01b0385811682528416602082015260408101839052608060608201819052600090613e4490830184613c30565b600060208284031215614e3457600080fd5b8151612bd581613a8f56fe4142434445464748494a4b4c4d4e4f505152535455565758595a6162636465666768696a6b6c6d6e6f707172737475767778797a303132333435363738392b2fa26469706673582212208cbda998e2d1c392d24457a9d942d4883c43b30d459bbd4a2bfc6e7bdbe94dff64736f6c63430008180033";
+/* ========================================= */
+(function boot(){
+  if (window.ethers) return start();
+  const urls=["https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.4/ethers.umd.min.js","https://unpkg.com/ethers@6.13.4/dist/ethers.umd.min.js"];
+  (function next(i){ if(i>=urls.length) return alert("Could not load ethers.js"); const s=document.createElement("script"); s.src=urls[i]; s.onload=()=>window.ethers?start():next(i+1); s.onerror=()=>next(i+1); document.head.appendChild(s); })(0);
+})();
+
+function start(){
+const E=window.ethers, $=id=>document.getElementById(id);
+const iface=new E.Interface(ABI);
+const ERC20=["function balanceOf(address) view returns (uint256)","function allowance(address,address) view returns (uint256)","function approve(address,uint256) returns (bool)","function nonces(address) view returns (uint256)","function name() view returns (string)","function version() view returns (string)"];
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const short=a=>a?a.slice(0,6)+"…"+a.slice(-4):"";
+const same=(a,b)=>a&&b&&a.toLowerCase()===b.toLowerCase();
+const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch{return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}};
+const usd=v=>{const n=Number(E.formatUnits(v,6));return "$"+n.toLocaleString(undefined,{minimumFractionDigits:n%1?2:0,maximumFractionDigits:2});};
+function toast(m,k="",ms=4500){const d=document.createElement("div");d.className="toast "+k;d.innerHTML=m;$("toasts").appendChild(d);setTimeout(()=>d.remove(),ms);return d;}
+function hint(m){$("hint").textContent=m||"";$("hint").classList.toggle("hidden",!m);}
+
+/* ---------- i18n ---------- */
+const T={pl:{},en:{tagline:"all-or-nothing · USDC · Base",connect:"Connect wallet",setupTitle:"Set up Zrzutka",setupText:"This page has no contract yet. Connect the wallet that should receive the platform fees (1% of successful campaigns) and deploy the contract on Base.",deploy:"Connect wallet & deploy",deployed:"Contract deployed:",deployedSend:"Send this address to whoever manages the site — once added, everyone sees the campaigns at this link.",
+heroTitle:"Fundraising on Base. All or nothing.",heroText:"Raise USDC for a trip, a gift, a renovation or a project. Goal reached — the organiser gets the money. Goal missed — everyone gets an automatic refund.",newCampaign:"+ Start a campaign",howBtn:"How it works",kCampaigns:"campaigns",kRaised:"raised",kBadges:"NFT badges",
+tActive:"Active",tSuccess:"Successful",tEnded:"Ended",tMine:"Mine",tBacked:"Backed",howTitle:"How it works",how1:"1️⃣ The organiser starts a campaign: goal in USDC (from $1) and a deadline (up to 180 days).",how2:"2️⃣ Backers contribute USDC with a single wallet signature and can leave a message.",how3:"3️⃣ Goal reached → the organiser withdraws the funds (1% platform fee).",how4:"4️⃣ Goal missed or campaign cancelled → everyone takes a 100% refund.",how5:"5️⃣ Backers of successful campaigns mint a soulbound “Supporter” NFT badge.",howNote:"The contract has not been audited. Only contribute what you can afford to lose. Funds are held by the smart contract, not by a company.",
+createTitle:"New campaign",fTitle:"Title (max 80 characters)",fDesc:"Description — what you are raising for and why",fLink:"Link (optional — website, X, photos)",fGoal:"Goal (USDC)",fDays:"Duration",days:"days",createBtn:"Start campaign",back:"Back",backList:"← All campaigns",
+share:"🔗 Share",report:"🚩 Report",updates:"Updates",updPh:"Write an update for your backers…",postUpd:"Publish update",backersList:"Backers",backers:"backers",giveAmount:"Amount (USDC)",giveMsg:"Message (optional)",giveMsgPh:"Good luck! 💙",give:"Back this campaign",
+creatorPanel:"Organiser panel",claim:"💰 Withdraw funds",extend:"⏳ Extend deadline",edit:"✏️ Edit description",cancelC:"Cancel campaign",creatorNote:"Withdrawal works once the goal is reached — also before the deadline (the campaign then ends). Cancelling lets everyone take a refund.",
+myProfile:"My profile",pName:"Name shown with your campaigns and contributions",save:"Save",myBadges:"My NFT badges",badgesNote:"Badges are earned by backing successful campaigns. They are soulbound — they can't be sold or transferred.",
+adminTitle:"Admin panel",aFees:"fees",aFee:"Fee on successful campaigns (%) — max 5",aLimits:"Minimum goal (USDC) / max days",aStop:"Stop a scam campaign (everyone gets refunded)",aStopBtn:"Stop",aPause:"New campaigns & contributions",aContract:"Contract",aFeesTo:"fees go to"}};
+let lang=store.get("zr_lang",(navigator.language||"").toLowerCase().startsWith("pl")?"pl":"en");
+const PL={left:"zostało",ended:"zakończona",goal:"z celu",of:"z",by:"organizuje",active:"Trwa",success:"Udana ✓",failed:"Nieudana",cancelled:"Anulowana",goalReached:"Cel osiągnięty!",none:"Brak zbiórek w tej kategorii.",noBack:"Bądź pierwszą osobą, która wesprze tę zbiórkę!",noUpd:"Brak aktualności.",follow:"Obserwuj",following:"Obserwujesz",yourContribution:"Twoja wpłata",refund:"↩️ Odbierz zwrot",mintBadge:"🏅 Odbierz odznakę NFT",badgeOwned:"🏅 Masz odznakę tej zbiórki",refunded:"Zwrot odebrany ✓",confirm:"Potwierdź w portfelu…",waiting:"Czekam na Base…",signPermit:"Podpisz zgodę na wpłatę USDC (bez opłat)…",lowUsdc:"Za mało USDC na Base",created:"Zbiórka założona! 🎉",thanks:"Dziękujemy za wsparcie! 💙",done:"Gotowe",copied:"Link skopiowany",cancelAsk:"Na pewno anulować? Wszyscy wspierający będą mogli odebrać zwrot.",extendAsk:"O ile dni przedłużyć? (1–30, tylko raz)",reportAsk:"Dlaczego zgłaszasz tę zbiórkę?",editAsk:"Nowy opis zbiórki:",preview:"Zbiórka potrwa do {d}. Jeśli do tego dnia zbierzesz {g}, wypłacisz {n} (po prowizji {f}%).",noWallet:"Brak portfela w tej przeglądarce. Otwórz stronę w Chrome z MetaMaskiem albo w aplikacji MetaMask.",walletWaiting:"👉 Portfel czeka: kliknij ikonę lisa 🦊 w prawym górnym rogu Chrome i zatwierdź.",fileProto:"MetaMask nie działa na pliku z dysku. Otwórz wersję online:",days:"dni",hours:"godz.",yourBalance:"Twoje saldo: {b} USDC na Base",rejected:"Anulowano w portfelu",failedTx:"Transakcja nie powiodła się",paused:"Platforma jest wstrzymana",step1:"Krok 1: odblokuj MetaMask i zatwierdź połączenie (ikona lisa w prawym górnym rogu, jeśli nie wyskoczyło okienko).",step2:"Krok 2: potwierdź wdrożenie w MetaMasku.",step3:"Krok 3: czekam na potwierdzenie z Base…",pause:"Działa — kliknij, by wstrzymać",unpause:"Wstrzymane — kliknij, by wznowić",reports:"zgłoszeń"};
+const EN={left:"left",ended:"ended",goal:"of goal",of:"of",by:"by",active:"Active",success:"Successful ✓",failed:"Failed",cancelled:"Cancelled",goalReached:"Goal reached!",none:"No campaigns in this category.",noBack:"Be the first to back this campaign!",noUpd:"No updates yet.",follow:"Follow",following:"Following",yourContribution:"Your contribution",refund:"↩️ Get refund",mintBadge:"🏅 Mint NFT badge",badgeOwned:"🏅 You own this campaign's badge",refunded:"Refunded ✓",confirm:"Confirm in your wallet…",waiting:"Waiting for Base…",signPermit:"Sign the USDC spending permit (free)…",lowUsdc:"Not enough USDC on Base",created:"Campaign created! 🎉",thanks:"Thank you for your support! 💙",done:"Done",copied:"Link copied",cancelAsk:"Really cancel? All backers will be able to take a refund.",extendAsk:"Extend by how many days? (1–30, only once)",reportAsk:"Why are you reporting this campaign?",editAsk:"New campaign description:",preview:"The campaign runs until {d}. If you raise {g} by then, you can withdraw {n} (after the {f}% fee).",noWallet:"No wallet in this browser. Open this page in Chrome with MetaMask or in the MetaMask app.",walletWaiting:"👉 Your wallet is waiting: click the 🦊 MetaMask icon at the top right of Chrome and approve.",fileProto:"MetaMask does not work on a file opened from disk. Open the online version:",days:"days",hours:"h",yourBalance:"Your balance: {b} USDC on Base",rejected:"Cancelled in wallet",failedTx:"Transaction failed",paused:"The platform is paused",step1:"Step 1: unlock MetaMask and approve the connection (fox icon at the top right if no window appeared).",step2:"Step 2: confirm the deployment in MetaMask.",step3:"Step 3: waiting for Base…",pause:"Running — click to pause",unpause:"Paused — click to resume",reports:"reports"};
+const L=()=>lang==="pl"?PL:EN;
+const t=(k,v={})=>String(L()[k]??k).replace(/\{(\w+)\}/g,(_,x)=>v[x]??"");
+document.querySelectorAll("[data-i18n]").forEach(el=>{ T.pl[el.dataset.i18n]=el.textContent; });
+document.querySelectorAll("[data-i18n-ph]").forEach(el=>{ T.pl[el.dataset.i18nPh]=el.placeholder; });
+function applyI18n(){ document.documentElement.lang=lang; document.querySelectorAll("[data-i18n]").forEach(el=>el.textContent=T[lang][el.dataset.i18n]??T.pl[el.dataset.i18n]); document.querySelectorAll("[data-i18n-ph]").forEach(el=>el.placeholder=T[lang][el.dataset.i18nPh]??T.pl[el.dataset.i18nPh]); $("langChip").textContent=lang==="pl"?"EN":"PL"; if(account) $("acct").textContent=short(account); }
+$("langChip").onclick=()=>{ lang=lang==="pl"?"en":"pl"; store.set("zr_lang",lang); applyI18n(); route(); };
+
+/* ---------- chain ---------- */
+const NET=E.Network.from(CHAIN_ID); let rpcIdx=0;
+const rp=()=>new E.JsonRpcProvider(RPCS[rpcIdx],NET,{staticNetwork:NET,batchMaxCount:1});
+let CA=null, reader=null, usdcR=null;
+async function R(fn,...args){ for(let i=0;i<RPCS.length;i++){ try{ return await reader[fn](...args); }catch(e){ if(e?.code==="CALL_EXCEPTION"&&e?.data) throw e; rpcIdx=(rpcIdx+1)%RPCS.length; reader=reader.connect(rp()); usdcR=usdcR.connect(rp()); if(i===RPCS.length-1) throw e; } } }
+
+/* ---------- wallet (EIP-6963) ---------- */
+const announced=[];
+window.addEventListener("eip6963:announceProvider",e=>{const d=e.detail;if(d&&d.provider&&d.info&&!announced.some(w=>w.info.uuid===d.info.uuid))announced.push(d);});
+window.dispatchEvent(new Event("eip6963:requestProvider"));
+let eth=null, signer=null, account=null, rw=null, owner=null;
+async function findWallets(wait){window.dispatchEvent(new Event("eip6963:requestProvider"));const t0=Date.now();while(Date.now()-t0<wait&&!announced.length&&!window.ethereum)await sleep(100);await sleep(200);const l=[...announced];if(!l.length&&window.ethereum)l.push({info:{uuid:"inj",rdns:"injected",name:"Browser wallet",icon:""},provider:window.ethereum});return l;}
+function picker(list){return new Promise(res=>{const m=document.createElement("div");m.className="modal";m.innerHTML=`<div class="card"><h2>Wallet</h2><div class="wl">${list.map((w,i)=>`<button data-i="${i}">${w.info.icon?`<img src="${esc(w.info.icon)}">`:"👛"} ${esc(w.info.name)}</button>`).join("")}</div></div>`;m.onclick=e=>{const b=e.target.closest("[data-i]");if(b){m.remove();res(list[+b.dataset.i]);}else if(e.target===m){m.remove();res(null);}};document.body.appendChild(m);});}
+async function pickWallet(interactive){const list=await findWallets(interactive?1500:700);if(!list.length)return null;const saved=store.get("zr_wallet",null);let w=list.find(x=>x.info.rdns===saved);if(!w&&list.length===1)w=list[0];if(!w&&!interactive)w=list.find(x=>/metamask/i.test(x.info.rdns))||list[0];if(!w)w=await picker(list.sort((x,y)=>(/metamask/i.test(y.info.rdns)?1:0)-(/metamask/i.test(x.info.rdns)?1:0)));if(!w)return null;if(interactive)store.set("zr_wallet",w.info.rdns);return w.provider;}
+async function wreq(method,params){const tm=setTimeout(()=>hint(t("walletWaiting")),3500);try{return await eth.request({method,params});}finally{clearTimeout(tm);hint("");}}
+async function ensureBase(){const id=await eth.request({method:"eth_chainId"});if(parseInt(id,16)===CHAIN_ID)return;try{await wreq("wallet_switchEthereumChain",[{chainId:"0x2105"}]);}catch(e){if(e?.code===4001)throw e;await wreq("wallet_addEthereumChain",[{chainId:"0x2105",chainName:"Base",nativeCurrency:{name:"Ether",symbol:"ETH",decimals:18},rpcUrls:[RPCS[0]],blockExplorerUrls:[EXPLORER]}]);}}
+async function connect(silent){
+  if(location.protocol==="file:"){ toast(esc(t("fileProto"))+` <a href="${SITE_URL}" style="color:#fff">${SITE_URL}</a>`,"err",9000); return false; }
+  eth=await pickWallet(!silent); if(!eth){ if(!silent) toast(esc(t("noWallet")),"err",8000); return false; }
+  const accs=silent?await eth.request({method:"eth_accounts"}):await wreq("eth_requestAccounts",[]); if(!accs?.length) return false;
+  if(!silent) await ensureBase(); else { const id=await eth.request({method:"eth_chainId"}); if(parseInt(id,16)!==CHAIN_ID) return false; }
+  signer=await new E.BrowserProvider(eth,"any").getSigner(); account=await signer.getAddress();
+  $("acct").textContent=short(account);
+  if(CA){ rw=new E.Contract(CA,ABI,signer); owner=await R("owner"); $("adminChip").classList.toggle("hidden",!same(owner,account)); refreshUsdc(); }
+  eth.on?.("accountsChanged",()=>location.reload()); eth.on?.("chainChanged",()=>location.reload());
+  return true;
+}
+$("acct").onclick=async()=>{ if(account) return go("me"); try{ if(await connect(false)) route(); }catch(e){ toast(friendly(e),"err"); } };
+async function needWallet(){ if(account) { await ensureBase(); return true; } return await connect(false); }
+async function refreshUsdc(){ if(!account||!usdcR) return; try{ const b=await usdcR.balanceOf(account); $("usdcChip").textContent=`💵 ${usd(b)}`; $("usdcChip").classList.remove("hidden"); return b; }catch{} }
+
+function friendly(e){
+  const c=e?.code, ic=e?.info?.error?.code;
+  if(c==="ACTION_REJECTED"||c===4001||ic===4001) return t("rejected");
+  if(/insufficient funds/i.test(e?.message||"")) return "ETH: insufficient funds for gas";
+  let n=null; try{ const d=e?.data||e?.info?.error?.data; if(d&&d!=="0x") n=iface.parseError(d)?.name; }catch{}
+  const map={Paused:t("paused"),NotActive:"Not active",Ended:"Ended",GoalNotReached:"Goal not reached",NothingToRefund:"Nothing to refund",AlreadyDone:"Already done",NotEligible:"Not eligible",BadInput:"Invalid input",GoalReached:"Goal already reached"};
+  return n?(map[n]||n):(t("failedTx")+(e?.shortMessage?": "+esc(e.shortMessage):""));
+}
+async function tx(fn,args=[],label){
+  await ensureBase();
+  try{ await reader[fn].staticCall(...args,{from:account}); }catch(e){ if(e?.code==="CALL_EXCEPTION"||e?.data) throw e; }
+  const gas=await rw[fn].estimateGas(...args);
+  const tt=toast(`<span class="spin"></span>${esc(label||t("confirm"))}`,"",180000);
+  const tm=setTimeout(()=>hint(t("walletWaiting")),4000);
+  try{ const s=await rw[fn](...args,{gasLimit:gas*13n/10n+30000n}); clearTimeout(tm); hint(""); tt.innerHTML=`<span class="spin"></span>${esc(t("waiting"))}`; return await s.wait(); }
+  finally{ clearTimeout(tm); hint(""); tt.remove(); }
+}
+
+/* ---------- router ---------- */
+const views=["vSetup","vHome","vCreate","vCamp","vMe","vAdmin"];
+function show(v){ views.forEach(x=>$(x).classList.toggle("hidden",x!==v)); window.scrollTo(0,0); }
+function go(page,id){ const q=page==="camp"?`?c=${id}`:page==="home"?"":`?p=${page}`; history.pushState(null,"",location.pathname+q); route(); }
+window.addEventListener("popstate",route);
+$("brand").onclick=()=>go("home");
+let tab="active";
+function route(){
+  if(!CA) return;
+  const q=new URLSearchParams(location.search);
+  if(q.get("c")) return openCampaign(Number(q.get("c")));
+  const p=q.get("p");
+  if(p==="new") return openCreate();
+  if(p==="me") return openMe();
+  if(p==="admin") return openAdmin();
+  openHome();
+}
+
+/* ---------- helpers ---------- */
+function stateOf(c){
+  const now=Date.now()/1000, st=Number(c.status), ended=now>=Number(c.deadline);
+  if(st===1) return {k:"success",tag:`<span class="tag t-ok">${t("success")}</span>`};
+  if(st===2) return {k:"ended",tag:`<span class="tag t-can">${t("cancelled")}</span>`};
+  if(c.raised>=c.goal) return {k:ended?"success":"active",tag:`<span class="tag t-goal">${t("goalReached")}</span>`};
+  if(ended) return {k:"ended",tag:`<span class="tag t-fail">${t("failed")}</span>`};
+  return {k:"active",tag:`<span class="tag t-act">${t("active")}</span>`};
+}
+function timeLeft(c){ if(Number(c.status)!==0) return t("ended"); const s=Number(c.deadline)-Date.now()/1000; if(s<=0) return t("ended"); const d=Math.floor(s/86400); if(d>=1) return `${d} ${t("days")} ${t("left")}`; return `${Math.ceil(s/3600)} ${t("hours")} ${t("left")}`; }
+const pct=c=>c.goal>0n?Math.min(100,Number(c.raised*10000n/c.goal)/100):0;
+const names={};
+async function nameOf(a){ if(names[a]!==undefined) return names[a]||short(a); try{ names[a]=await R("profileName",a); }catch{ names[a]=""; } return names[a]||short(a); }
+
+/* ---------- home ---------- */
+async function openHome(){
+  show("vHome");
+  R("stats").then(s=>{ $("kC").textContent=s[0]; $("kR").textContent=usd(s[1]); $("kB").textContent=s[3]; }).catch(()=>{});
+  document.querySelectorAll("#tabs button").forEach(b=>{ b.classList.toggle("on",b.dataset.t===tab); b.onclick=()=>{ tab=b.dataset.t; openHome(); }; });
+  $("list").innerHTML=`<div class="empty">…</div>`;
+  try{
+    let ids=[], list=[];
+    if(tab==="mine"||tab==="backed"){
+      if(!account){ if(!await connect(false)) { $("list").innerHTML=`<div class="empty">${esc(t("noWallet"))}</div>`; return; } }
+      const own=await R(tab==="mine"?"campaignsCreatedBy":"campaignsBackedBy",account);
+      ids=[...own].map(Number).reverse(); list=await Promise.all(ids.map(id=>R("getCampaign",id)));
+    } else {
+      const [i,l]=await R("getCampaigns",0,200); ids=i.map(Number); list=l;
+    }
+    const rows=ids.map((id,i)=>({id,c:list[i],s:stateOf(list[i])})).filter(x=>tab==="mine"||tab==="backed"||x.s.k===tab);
+    if(!rows.length){ $("list").innerHTML=`<div class="empty">${esc(t("none"))}</div>`; return; }
+    $("list").innerHTML=rows.map(({id,c,s})=>`<div class="cc" data-id="${id}">${s.tag}<h3>${esc(c.title)}</h3><div class="by" data-by="${c.creator}">${t("by")} ${short(c.creator)}</div>
+      <div class="bar ${c.raised>=c.goal?"ok":""}"><i style="width:${pct(c)}%"></i></div>
+      <div class="meta"><span><b>${usd(c.raised)}</b> ${t("of")} ${usd(c.goal)}</span><span>👥 ${c.backers} · 👍 ${c.upvotes}</span><span>⏳ ${timeLeft(c)}</span></div></div>`).join("");
+    $("list").querySelectorAll(".cc").forEach(el=>el.onclick=()=>go("camp",el.dataset.id));
+    $("list").querySelectorAll("[data-by]").forEach(async el=>{ el.textContent=`${t("by")} ${await nameOf(el.dataset.by)}`; });
+  }catch(e){ console.warn(e); $("list").innerHTML=`<div class="empty">RPC error — refresh</div>`; }
+}
+$("btnNew").onclick=()=>go("new");
+
+/* ---------- create ---------- */
+let FEE=100;
+function updPreview(){ const d=Number($("fDays").value); $("fDaysV").textContent=d; const g=Number($("fGoal").value||0); const until=new Date(Date.now()+d*86400000).toLocaleDateString(lang); $("fPreview").textContent=t("preview",{d:until,g:"$"+g,n:"$"+(g*(1-FEE/10000)).toFixed(2),f:FEE/100}); }
+async function openCreate(){ show("vCreate"); try{ FEE=Number(await R("feeBps")); }catch{} updPreview(); }
+$("fDays").oninput=updPreview; $("fGoal").oninput=updPreview;
+$("btnCreateBack").onclick=()=>go("home");
+$("btnCreate").onclick=async()=>{
+  const title=$("fTitle").value.trim(), desc=$("fDesc").value.trim(), link=$("fLink").value.trim(), goal=$("fGoal").value, days=Number($("fDays").value);
+  if(!title||!(Number(goal)>=1)) return toast("Title + goal ≥ $1","err");
+  if(!await needWallet()) return;
+  $("btnCreate").disabled=true;
+  try{
+    const rc=await tx("createCampaign",[title,desc,link,E.parseUnits(goal,6),days]);
+    const ev=rc.logs.map(l=>{try{return iface.parseLog(l)}catch{return null}}).find(x=>x&&x.name==="CampaignCreated");
+    toast(t("created"),"ok"); ["fTitle","fDesc","fLink"].forEach(i=>$(i).value=""); go("camp",Number(ev.args.id));
+  }catch(e){ toast(friendly(e),"err",7000); } finally{ $("btnCreate").disabled=false; }
+};
+
+/* ---------- campaign ---------- */
+let CUR=0, C=null;
+async function openCampaign(id){
+  CUR=id; show("vCamp");
+  try{ C=await R("getCampaign",id); }catch{ toast("Campaign not found","err"); return go("home"); }
+  const c=C, s=stateOf(c), active=Number(c.status)===0&&Date.now()/1000<Number(c.deadline);
+  $("cTag").innerHTML=s.tag; $("cId").textContent=`#${id}`;
+  $("cTitle").textContent=c.title; $("cDesc").textContent=c.description;
+  $("cBy").textContent=`${t("by")} ${short(c.creator)} · ${new Date(Number(c.createdAt)*1000).toLocaleDateString(lang)}`; nameOf(c.creator).then(n=>$("cBy").textContent=`${t("by")} ${n} · ${new Date(Number(c.createdAt)*1000).toLocaleDateString(lang)}`);
+  $("cLink").innerHTML=/^https?:\/\//i.test(c.link)?`🔗 <a href="${esc(c.link)}" target="_blank" rel="noopener nofollow">${esc(c.link)}</a>`:"";
+  $("cRaised").textContent=usd(c.raised); $("cGoal").textContent=`${t("of")} ${usd(c.goal)} · ${pct(c).toFixed(0)}% ${t("goal")}`;
+  $("cBar").style.width=pct(c)+"%"; $("cBarWrap").classList.toggle("ok",c.raised>=c.goal);
+  $("cBackers").textContent=c.backers; $("cTime").textContent=`⏳ ${timeLeft(c)}`+(c.reports>0n?` · 🚩 ${c.reports} ${t("reports")}`:"");
+  $("cUp").textContent=c.upvotes; $("cFol").textContent=c.followers;
+  $("boxGive").classList.toggle("hidden",!active);
+  $("amts").innerHTML=[5,10,25,50,100].map(v=>`<button data-v="${v}">$${v}</button>`).join("");
+  $("amts").querySelectorAll("button").forEach(b=>b.onclick=()=>{ $("gAmount").value=b.dataset.v; $("amts").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b)); });
+  $("gNote").textContent=""; if(account) refreshUsdc().then(b=>{ if(b!==undefined) $("gNote").textContent=t("yourBalance",{b:usd(b).slice(1)}); });
+  const isCreator=account&&same(account,c.creator);
+  $("boxCreator").classList.toggle("hidden",!(isCreator&&Number(c.status)===0));
+  $("creatorUpdate").classList.toggle("hidden",!isCreator);
+  $("bClaim").classList.toggle("hidden",c.raised<c.goal);
+  $("bExtend").classList.toggle("hidden",c.extended||c.raised>=c.goal||!active);
+  // updates
+  R("getUpdates",id).then(u=>{ $("cUpdates").innerHTML=u.length?[...u].reverse().map(x=>`<div class="item"><div class="t">${new Date(Number(x.time)*1000).toLocaleString(lang)}</div>${esc(x.text)}</div>`).join(""):`<div class="muted">${esc(t("noUpd"))}</div>`; }).catch(()=>{});
+  // backings
+  R("getBackings",id,0,100).then(async([list,total])=>{ $("cBackCount").textContent=`(${total})`;
+    $("cBackings").innerHTML=list.length?list.map(b=>`<div class="item"><b data-n="${b.backer}">${short(b.backer)}</b> · ${usd(b.amount)}<div class="t">${new Date(Number(b.time)*1000).toLocaleString(lang)}</div>${b.message?`<div>“${esc(b.message)}”</div>`:""}</div>`).join(""):`<div class="muted">${esc(t("noBack"))}</div>`;
+    $("cBackings").querySelectorAll("[data-n]").forEach(async el=>el.textContent=await nameOf(el.dataset.n)); }).catch(()=>{});
+  // my state
+  $("boxMine").innerHTML=""; $("cFollowTxt").textContent=t("follow");
+  if(account){
+    const [mine,ref,up,fol,badge]=await Promise.all([R("contributionOf",id,account),R("refundedTo",id,account),R("upvoted",id,account),R("following",id,account),R("badgeOf",id,account)]);
+    $("bUp").disabled=up; $("cFollowTxt").textContent=fol?t("following"):t("follow"); $("bFollow").dataset.on=fol?"1":"";
+    if(mine>0n){
+      let h=`<div class="item">${t("yourContribution")}: <b>${usd(mine)}</b></div>`;
+      const failed=Number(c.status)===0&&Date.now()/1000>=Number(c.deadline)&&c.raised<c.goal;
+      if(ref) h+=`<p class="note">${t("refunded")}</p>`;
+      else if(failed||Number(c.status)===2) h+=`<button class="btn big" id="bRefund" style="margin-top:8px">${t("refund")}</button>`;
+      if(Number(c.status)===1) h+= badge>0n?`<p class="note">${t("badgeOwned")} (#${badge})</p>`:`<button class="btn big green" id="bBadge" style="margin-top:8px">${t("mintBadge")}</button>`;
+      $("boxMine").innerHTML=h;
+      $("bRefund")&&($("bRefund").onclick=()=>act("refund",[id]));
+      $("bBadge")&&($("bBadge").onclick=()=>act("mintBadge",[id]));
+    }
+  }
+}
+async function act(fn,args,msg){ if(!await needWallet()) return; try{ await tx(fn,args); toast(msg||t("done"),"ok"); openCampaign(CUR); refreshUsdc(); }catch(e){ toast(friendly(e),"err",7000); } }
+$("campBack").onclick=e=>{ e.preventDefault(); go("home"); };
+$("bUp").onclick=()=>act("upvote",[CUR]);
+$("bFollow").onclick=()=>act("setFollow",[CUR,!$("bFollow").dataset.on]);
+$("bShare").onclick=async()=>{ const url=SITE_URL+"?c="+CUR; if(navigator.share){ try{ await navigator.share({title:C?.title||"Zrzutka",url}); return; }catch{} } navigator.clipboard?.writeText(url); toast(t("copied")); };
+$("bReport").onclick=()=>{ const r=prompt(t("reportAsk")); if(r!==null) act("report",[CUR,r.slice(0,200)]); };
+$("bPostUpd").onclick=()=>{ const x=$("updText").value.trim(); if(!x) return; act("postUpdate",[CUR,x]).then(()=>$("updText").value=""); };
+$("bClaim").onclick=()=>act("claim",[CUR]);
+$("bExtend").onclick=()=>{ const d=parseInt(prompt(t("extendAsk"),"7")); if(d>=1&&d<=30) act("extendDeadline",[CUR,d]); };
+$("bEdit").onclick=()=>{ const d=prompt(t("editAsk"),C?.description||""); if(d!==null) act("editCampaign",[CUR,d.slice(0,1000),C?.link||""]); };
+$("bCancel").onclick=()=>{ if(confirm(t("cancelAsk"))) act("cancel",[CUR]); };
+
+/* contribute: permit (1 signature + 1 tx) with approve fallback */
+async function permitDomain(){
+  const u=new E.Contract(USDC_ADDRESS,[...ERC20,"function eip712Domain() view returns (bytes1,string,string,uint256,address,bytes32,uint256[])"],rp());
+  const name=await u.name(); let version="1";
+  try{ version=await u.version(); }catch{ try{ version=(await u.eip712Domain())[2]; }catch{} }
+  return {name,version,chainId:CHAIN_ID,verifyingContract:USDC_ADDRESS};
+}
+$("bGive").onclick=async()=>{
+  const amtStr=$("gAmount").value, msg=$("gMsg").value.trim().slice(0,200);
+  if(!(Number(amtStr)>0)) return;
+  if(!await needWallet()) return;
+  const amount=E.parseUnits(amtStr,6);
+  $("bGive").disabled=true;
+  try{
+    const bal=await usdcR.balanceOf(account); if(bal<amount) return toast(t("lowUsdc"),"err");
+    await reader.contribute.staticCall(CUR,0n,msg,{from:account}).catch(e=>{ const n=(()=>{try{return iface.parseError(e.data)?.name}catch{return null}})(); if(n&&n!=="BadInput") throw e; });
+    const allowance=await usdcR.allowance(account,CA);
+    if(allowance>=amount){ await tx("contribute",[CUR,amount,msg]); }
+    else {
+      let signed=null;
+      try{
+        const tt=toast(`<span class="spin"></span>${esc(t("signPermit"))}`,"",120000);
+        try{
+          const domain=await permitDomain(); const nonce=await usdcR.nonces(account); const deadline=BigInt(Math.floor(Date.now()/1000)+3600);
+          const types={Permit:[{name:"owner",type:"address"},{name:"spender",type:"address"},{name:"value",type:"uint256"},{name:"nonce",type:"uint256"},{name:"deadline",type:"uint256"}]};
+          const sig=E.Signature.from(await signer.signTypedData(domain,types,{owner:account,spender:CA,value:amount,nonce,deadline}));
+          signed={deadline,sig};
+        } finally{ tt.remove(); }
+      }catch(e){ if(e?.code==="ACTION_REJECTED"||e?.code===4001) throw e; console.warn("permit signature unavailable, falling back to approve:",e?.message||e); signed=null; }
+      if(signed){ await tx("contributeWithPermit",[CUR,amount,msg,signed.deadline,signed.sig.v,signed.sig.r,signed.sig.s]); }
+      else {
+        const u=new E.Contract(USDC_ADDRESS,ERC20,signer);
+        const tt=toast(`<span class="spin"></span>${esc(t("confirm"))} (approve)`,"",180000);
+        try{ await (await u.approve(CA,amount)).wait(); } finally{ tt.remove(); }
+        await tx("contribute",[CUR,amount,msg]);
+      }
+    }
+    toast(t("thanks"),"ok"); $("gMsg").value=""; openCampaign(CUR); refreshUsdc();
+  }catch(e){ toast(friendly(e),"err",7000); }
+  finally{ $("bGive").disabled=false; }
+};
+
+/* ---------- profile ---------- */
+async function openMe(){
+  show("vMe"); if(!account&&!await connect(false)) return;
+  const nm=await R("profileName",account).catch(()=> ""); if(!$("pName").value||document.activeElement!==$("pName")) $("pName").value=nm||$("pName").value;
+  $("myBadges").innerHTML="…";
+  try{
+    const n=Number(await R("balanceOf",account)); const total=Number(await R("badgesMinted"));
+    const mine=[]; for(let id=1;id<=total&&mine.length<n;id++){ try{ if(same(await R("ownerOf",id),account)) mine.push(id); }catch{} }
+    const imgs=await Promise.all(mine.map(async id=>{ const uri=await R("tokenURI",id); const j=JSON.parse(atob(uri.split(",")[1])); return `<div><img src="${j.image}" alt=""><div class="note">${esc(j.name)}</div></div>`; }));
+    $("myBadges").innerHTML=imgs.join("")||`<div class="muted">—</div>`;
+  }catch{ $("myBadges").innerHTML=""; }
+}
+$("bName").onclick=async()=>{ const n=$("pName").value.trim(); if(!n) return; if(!await needWallet()) return; try{ await tx("setProfileName",[n]); names[account]=n; toast(t("done"),"ok"); }catch(e){ toast(friendly(e),"err"); } };
+
+/* ---------- admin ---------- */
+$("adminChip").onclick=()=>go("admin");
+async function openAdmin(){
+  show("vAdmin"); if(!account&&!await connect(false)) return;
+  const [s,fee,min,max,paused,own]=await Promise.all([R("stats"),R("feeBps"),R("minGoal"),R("maxDurationDays"),R("paused"),R("owner")]);
+  $("aC").textContent=s[0]; $("aR").textContent=usd(s[1]); $("aF").textContent=usd(s[2]);
+  $("aFeeIn").value=Number(fee)/100; $("aMin").value=Number(E.formatUnits(min,6)); $("aMax").value=Number(max);
+  $("aPauseBtn").textContent=paused?t("unpause"):t("pause"); $("aPauseBtn").onclick=()=>adm("setPaused",[!paused]);
+  $("aLink").href=`${EXPLORER}/address/${CA}`; $("aLink").textContent=short(CA); $("aOwner").textContent=own;
+}
+async function adm(fn,args){ try{ await tx(fn,args); toast(t("done"),"ok"); openAdmin(); }catch(e){ toast(friendly(e),"err"); } }
+$("aFeeSave").onclick=()=>adm("setFee",[Math.round(parseFloat($("aFeeIn").value)*100)]);
+$("aLimSave").onclick=()=>adm("setLimits",[E.parseUnits(String($("aMin").value),6),parseInt($("aMax").value)]);
+$("aStopBtn").onclick=()=>{ const id=parseInt($("aStopId").value); if(id>0&&confirm("adminCancel #"+id+"?")) adm("adminCancel",[id]); };
+
+/* ---------- setup (no contract yet) ---------- */
+function initSetup(){
+  show("vSetup");
+  const step=m=>{ $("deployStep").textContent=m; $("deployStep").classList.toggle("hidden",!m); };
+  $("btnDeploy").onclick=async()=>{
+    try{
+      step(t("step1")); if(!await connect(false)){ step(""); return; }
+      $("btnDeploy").disabled=true; step(t("step2"));
+      const c=await new E.ContractFactory(ABI,BYTECODE,signer).deploy(USDC_ADDRESS);
+      step(t("step3")); await c.waitForDeployment(); const addr=await c.getAddress(); step("");
+      store.set("zr_preview",addr);
+      $("deployedAddr").innerHTML=`<a href="${EXPLORER}/address/${addr}" target="_blank" rel="noopener">${addr}</a>`; $("deployResult").classList.remove("hidden"); $("btnDeploy").classList.add("hidden");
+    }catch(e){ step(friendly(e)); $("btnDeploy").disabled=false; }
+  };
+}
+
+/* ---------- go ---------- */
+applyI18n();
+const preview=store.get("zr_preview",null);
+if(E.isAddress(CONTRACT_ADDRESS)) CA=E.getAddress(CONTRACT_ADDRESS);
+else if(preview&&E.isAddress(preview)&&new URLSearchParams(location.search).has("preview")) CA=preview;
+if(!CA){ initSetup(); connect(true).catch(()=>{}); return; }
+reader=new E.Contract(CA,ABI,rp()); usdcR=new E.Contract(USDC_ADDRESS,ERC20,rp());
+connect(true).catch(()=>{}).finally(()=>route());
+}
+</script>
+</body>
+</html>
