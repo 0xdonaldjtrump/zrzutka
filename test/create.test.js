@@ -1,0 +1,25 @@
+const { setup, assert, reverts, USD } = require("./helpers");
+module.exports = async () => {
+  console.log("Create, edit & updates");
+  const { signers: [, a, b], z, create, time, DAY } = await setup();
+  const id = await create(a, 250, 14, "Wyjazd w góry");
+  const c = await z.getCampaign(id);
+  assert(c.creator === (await a.getAddress()) && c.goal === USD(250) && c.title === "Wyjazd w góry", "campaign stored");
+  assert(Number(c.deadline - c.createdAt) === 14 * DAY, "deadline = now + 14 days");
+  await reverts(z.connect(a).createCampaign.staticCall("", "d", "", USD(10), 5), "BadInput", "empty title rejected");
+  await reverts(z.connect(a).createCampaign.staticCall("x".repeat(81), "d", "", USD(10), 5), "BadInput", "title max 80 bytes");
+  await reverts(z.connect(a).createCampaign.staticCall("t", "d", "", USD(0.5), 5), "BadInput", "goal below $1 rejected");
+  await reverts(z.connect(a).createCampaign.staticCall("t", "d", "", USD(10), 181), "BadInput", "duration max 180 days");
+  await (await z.connect(a).editCampaign(id, "New description", "https://new.link")).wait();
+  assert((await z.getCampaign(id)).description === "New description", "creator edits description");
+  await reverts(z.connect(b).editCampaign.staticCall(id, "hack", ""), "NotCreator", "others cannot edit");
+  await (await z.connect(a).postUpdate(id, "We booked the cabin!")).wait();
+  await (await z.connect(a).postUpdate(id, "Second update")).wait();
+  const u = await z.getUpdates(id);
+  assert(u.length === 2 && u[0].text === "We booked the cabin!", "creator posts updates");
+  await reverts(z.connect(b).postUpdate.staticCall(id, "spam"), "NotCreator", "others cannot post updates");
+  const id2 = await create(b, 10, 1);
+  const [ids] = await z.getCampaigns(0, 10);
+  assert(ids.length === 2 && ids[0] === BigInt(id2), "list is newest first");
+  assert((await z.campaignsCreatedBy(await a.getAddress())).length === 1, "campaigns per creator");
+};
