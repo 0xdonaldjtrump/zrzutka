@@ -1,0 +1,10 @@
+node_modules/
+build.json
+*.log
+.DS_Store
+.env
+e2e/env.json
+e2e/site/
+e2e/setup/
+e2e/*.png
+__pycache__/
