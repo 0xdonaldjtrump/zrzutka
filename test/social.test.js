@@ -1,0 +1,22 @@
+const { setup, assert, reverts } = require("./helpers");
+module.exports = async () => {
+  console.log("Upvotes, follows, reports, profiles");
+  const { signers: [, a, b, c], z, create } = await setup();
+  const id = await create(a);
+  await (await z.connect(b).upvote(id)).wait();
+  await (await z.connect(c).upvote(id)).wait();
+  await reverts(z.connect(b).upvote.staticCall(id), "AlreadyDone", "one upvote per wallet");
+  await (await z.connect(b).setFollow(id, true)).wait();
+  await reverts(z.connect(b).setFollow.staticCall(id, true), "AlreadyDone", "cannot follow twice");
+  await (await z.connect(c).setFollow(id, true)).wait();
+  await (await z.connect(c).setFollow(id, false)).wait();
+  let k = await z.getCampaign(id);
+  assert(k.upvotes === 2n && k.followers === 1n, "2 upvotes, 1 follower after unfollow");
+  await (await z.connect(b).report(id, "looks fake")).wait();
+  await reverts(z.connect(b).report.staticCall(id, "again"), "AlreadyDone", "one report per wallet");
+  assert((await z.getCampaign(id)).reports === 1n, "report counted");
+  await (await z.connect(b).setProfileName("Bartek")).wait();
+  assert((await z.profileName(await b.getAddress())) === "Bartek", "profile name saved");
+  await reverts(z.connect(b).setProfileName.staticCall("x".repeat(33)), "BadInput", "name max 32 bytes");
+  await reverts(z.connect(b).upvote.staticCall(99), "UnknownCampaign", "unknown campaign");
+};
