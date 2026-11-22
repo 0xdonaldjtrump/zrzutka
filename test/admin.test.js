@@ -1,0 +1,22 @@
+const { setup, assert, reverts, USD } = require("./helpers");
+module.exports = async () => {
+  console.log("Admin: scam stop, fees, pause, ownership");
+  const { signers: [o, a, b], z, create, give, bal } = await setup();
+  const id = await create(a, 100, 5);
+  await give(b, id, 50);
+  await reverts(z.connect(a).adminCancel.staticCall(id), "NotOwner", "only owner can stop campaigns");
+  await (await z.adminCancel(id)).wait();
+  const b0 = await bal(await b.getAddress());
+  await (await z.connect(b).refund(id)).wait();
+  assert((await bal(await b.getAddress())) - b0 === USD(50), "backers refunded after admin stop");
+  await reverts(z.setFee.staticCall(501), "BadInput", "fee max 5%");
+  await (await z.setFee(250)).wait();
+  assert((await z.feeBps()) === 250n, "owner sets fee");
+  await (await z.setPaused(true)).wait();
+  await reverts(z.connect(a).createCampaign.staticCall("t", "d", "", USD(10), 5), "Paused", "pause blocks new campaigns");
+  await (await z.setPaused(false)).wait();
+  await (await z.setLimits(USD(5), 60)).wait();
+  await reverts(z.connect(a).createCampaign.staticCall("t", "d", "", USD(4), 5), "BadInput", "owner raises minimum goal");
+  await (await z.transferOwnership(await a.getAddress())).wait();
+  assert((await z.owner()) === (await a.getAddress()), "ownership transferred");
+};
